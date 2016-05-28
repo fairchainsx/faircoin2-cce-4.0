@@ -127,7 +127,7 @@ def process_tx(tx_hash, blk_height):
         key['height'] = blk_height
         key['tx_hash'] = tx_hash
         key['raw'] = rawtx['Data']
-        key['value'] = Decimal(str(key['value']))
+        key['value'] = Decimal(key['value']).quantize(Decimal('1.00000000')).normalize()
         add_row('tx_out', key)
         if key['address'] != 'Unknown':
             accounting(key['address'], key['value'], True, 'add')
@@ -177,25 +177,28 @@ def process_block(blk_height):
         counter = 0
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
-        block = jsonrpc("getblock", b_hash)['Data']
+        block = jsonrpc("getblock", b_hash, 3)['Data']
         # In POS chains, nonce is used to determine if a block is POS.
         # The 'flags' field in the daemon output is unreliable due to different verbiage and multiple flags.
         # Merged mine chains also use 0 in the nonce field. This system will not work with POS merged mined chains.
         # POS merged mined compatibility will be added in the future
-        if CONFIG["chain"]["pos"] == 'true' and block['nonce'] == 0:
-            counter = 1
         for key in block['tx']:
-            if counter == 1:
-                counter = 2
-            elif counter == 2:
-                block['pos'] = key
-                counter = 0
             prostx = process_tx(key, blk_height)
             if prostx['Status'] == 'error':
                 raise Exception(prostx['Data'])
             total_sent = Decimal(total_sent + prostx['Data']['out'])
         block['raw'] = json.dumps(block, sort_keys=False, indent=1)
         add_row('block', block)
+
+        for cvn in block['cvnInfo']:
+            cvn['height'] = blk_height
+            add_row('cvn', cvn)
+
+        if block['chainParameters']:
+            cp = block['chainParameters']
+            cp['height'] = blk_height
+            add_row('chainParameter', cp)
+
         conn.commit()
         ret = query_noreturn('UPDATE block SET total_sent = %s, n_tx = %s WHERE height = %s',
                              total_sent, len(block['tx']), blk_height)
@@ -281,7 +284,7 @@ def main(argv):
 
             # Sleep is needed to allow the daemon time to catch orphans
             if startmode != 'newdb':
-                time.sleep(15)
+                time.sleep(3)
 
             # Recheck mode, re-parse the last 5 blocks in the database
             if startmode == 'recheck' and blk_height > 5:
@@ -302,7 +305,7 @@ def main(argv):
             # Genesis block TX needs to be entered manually. Process block information only
             if startmode == 'newdb':
                 b_hash = jsonrpc("getblockhash", 0)['Data']
-                block = jsonrpc("getblock", b_hash)['Data']
+                block = jsonrpc("getblock", b_hash, 4)['Data']
                 block['raw'] = json.dumps(block, sort_keys=False, indent=1)
                 add_row('block', block)
                 # Set up top_address table

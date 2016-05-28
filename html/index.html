@@ -11,10 +11,7 @@
     <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
 
             <h3>&nbsp;
-    {% if stats[0] > 0 %}
-        Network Hash Rate:&nbsp;<font style="color:maroon;">{{ stats[0] | normalize }}&nbsp;{{ ratelabel }}</font>&nbsp;&nbsp;
-    {% endif %}
-    Total Coins Minted:&nbsp;<font style="color:maroon;">{{ stats[2] | normalize }}</font>
+    Total coin-supply: <font style="color:maroon;">{{ stats[0] | normalize }}</font>
     </h3>
  </div>
 <div class="container-fluid table-responsive">
@@ -23,8 +20,9 @@
             <th>Height</th>
             <th>Age</th>
             <th>Transactions</th>
+            <th>Payload</th>
             <th>Total Sent</th>
-            <th>Difficulty</th>
+            <th>Creator ID</th>
             <th>Size</th>
         </thead>
      <tbody>
@@ -32,7 +30,7 @@
      <tr>
 	<td><form method="get"><input type="submit" class="button" input name= "block" value="{{ row[0] }}" formaction="block"></form>
 		</td><td>{{ row[2] | time_passed }}</td>
-		<td>{{ row[11] }}</td><td>{{ row[12] | normalize }}</td><td>{{ row[5] | normalize }}</td><td>{{ row[6] }}</td></tr>
+		<td>{{ row[12] }}</td><td>{{ row[6] }}</td><td>{{ row[13] | normalize }}</td><td>{{ row[3] }}</td><td>{{ row[8] }}</td></tr>
 	{% endfor %}
          </tbody>
 

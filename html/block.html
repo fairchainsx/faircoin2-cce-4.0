@@ -11,18 +11,28 @@
     <br />
     <h2>Block Height: <font style="color:maroon;"> {{ block.blk[0] }}</font></h2>
 
+<form style="display:inline" form="" action="block" method="get">
+<button class="btn" value="{{ block.blk[0] - 1}}" name="block" type="submit">&lt;-- Prev Block</button>
+</form>
+<form style="display:inline" form="" action="block" method="get">
+<button class="btn" value="{{ block.blk[0] + 1}}" name="block" type="submit">Next Block --&gt;</button>
+</form>
+
    </div>
  <div class="container-fluid">
-
-    Height: {{ block.blk[0] }} <br><br>
-    Hash: {{ block.blk[1] }} <br><br>
-    Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br><br>
-    Difficulty: {{ block.blk[5] | normalize }} (Bits: {{ block.blk[4] }}) <br><br>
-    Transactions: {{ block.blk[11] }} <br><br>
-    Total Sent: {{ block.blk[12] | normalize }} <br><br>
-    Size: {{ block.blk[6] }} kilobytes<br><br>
-    Merkle Root: {{ block.blk[8] }} <br><br>
-    Nonce: {{block.blk[3] }} <br><br>
+    Height: {{ block.blk[0] }} <br>
+    Hash: {{ block.blk[1] }} <br>
+    Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br>
+    Creator ID: {{ block.blk[3] }}<br>
+    Creator Signature: {{ block.blk[7] }}<br>
+    Signatures: {{ block.blk[4] }}<br>
+    Admin signatures: {{ block.blk[5] }}<br>
+    Payload: {{ block.blk[6] }}<br>
+    Transactions: {{ block.blk[12] }} <br>
+    Total Sent: {{ block.blk[13] | normalize }} <br>
+    Size: {{ block.blk[8] }} kilobytes<br>
+    Merkle Root: {{ block.blk[10] }} <br>
+    Version: {{ block.realVersion }} <br>
 
 </div>
 {% if block.transactions %}
@@ -33,36 +43,69 @@
             <th>Transaction Hash(TXID)</th>
             <th>Input Address : Amount</th>
             <th>Output Address : Amount</th>
-             </thead>
+        </thead>
      <tbody>
 
     {% for tx in block.transactions.iteritems() %}
     <tr><td><a href="/transaction?transaction={{ tx[0] }}">{{ tx[0] }}</a></td><td>
         {% for address,value in tx[1].txin.iteritems() %}
-            {% if address == "POW Generation" or address == "Proof of Stake" %}
-                {{ address }}
-                    {% if value > 0 %}
-                         : {{ value |normalize }}
-                    {% endif %}
+            {% if address == "PoC Fees" %}
+                {{ address }} : {{ value | normalize }}
             {% else %}
             <a href="/address?address={{ address }}">{{ address }}</a> : {{ value | normalize }} <br>
             {% endif %}
         {% endfor %}
         </td><td>
         {% for address,value in tx[1].txout.iteritems() %}
-            {% if value == 0 %}
-                {{ address }}
-            {% else %}
-                <a href="/address?address={{ address }}">{{ address }}</a>  : {{ value | normalize }} <br>
-            {% endif %}
+            <a href="/address?address={{ address }}">{{ address }}</a> : {{ value | normalize }} <br>
         {% endfor %}
         </td></tr>
     {% endfor %}
     </tbody>
+    </table>
+</div>
+{% endif %}
+{% if block.cvns %}
+<div class="container-fluid">
+<br /> <h2> CVN payload</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>CVN ID</th>
+            <th>Height added</th>
+            <th>Public key</th>
+        </thead>
+     <tbody>
 
+    {% for cvn in block.cvns %}
+    <tr>
+       <td>{{ cvn['nodeId'] }}</td>
+       <td>{{ cvn['heightAdded'] }}</td>
+       <td>{{ cvn['pubKey'] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endif %}
+{% if block['chainParameter'] %}
+<div class="container-fluid">
+<br /> <h2>Chain parameter payload</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Name</th>
+            <th>Value</th>
+        </thead>
+     <tbody>
 
-
-</table>
+    <tr><td>Version</td><td>{{ block['chainParameter']['version'] }}</td></tr>
+    <tr><td>Minimum CVN signers</td><td>{{ block['chainParameter']['minCvnSigners'] }}</td></tr>
+    <tr><td>Maximum CVN signers</td><td>{{ block['chainParameter']['maxCvnSigners'] }}</td></tr>
+    <tr><td>Block spacing (sec.)</td><td>{{ block['chainParameter']['blockSpacing'] }}</td></tr>
+    <tr><td>Block spacing grace period (sec.)</td><td>{{ block['chainParameter']['blockSpacingGracePeriod'] }}</td></tr>
+    <tr><td>Dust threshold</td><td>{{ block['chainParameter']['dustThreshold'] }}</td></tr>
+    <tr><td>Minimum successive signatures</td><td>{{ block['chainParameter']['minSuccessiveSignatures'] }}</td></tr>
+    </tbody>
+    </table>
 </div>
 {% endif %}
 {% else %}

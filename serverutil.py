@@ -36,7 +36,7 @@ config_parse = ConfigParser.ConfigParser()
 config_parse.read('cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
-URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@127.0.0.1:' + CONFIG["coind"][
+URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@' + CONFIG["coind"]["rpchost"] + ':' + CONFIG["coind"][
     "rpcport"])
 
 pool = PooledDB(pymysql, 50, db=CONFIG['database']['dbname'], host=CONFIG['database']['mysqlip'], port=int(CONFIG['database']['mysqlport']),
@@ -88,7 +88,8 @@ def time_passed(nTime):
 def normalize(n):
     try:
         num = Decimal(n).normalize()
-        return num.__trunc__() if not num % 1 else Decimal(num)
+        ret = num.__trunc__() if not num % 1 else Decimal(num)
+        return ret
     except:
         return n
 
@@ -183,21 +184,13 @@ def search_type(sterm):
 # of the second transaction in POS blocks, makes this level of complexity necessary.
 
 # The get coinbase function parses out the first tx in all blocks and the second TX in POS blocks.
-def get_coinbase(height, pos_gen_hash):
+def get_coinbase(height):
     try:
         base_txin = {}
         base_txout = {}
         tx_hash = query_single('SELECT tx_hash FROM tx_in WHERE coinbase != "0" AND height = %s', height)[0]
-        if pos_gen_hash != '0':
-            transactions[tx_hash] = {'txin': {'Proof of Stake': Decimal(0)}, 'txout': {'Generated coins sent in the next transaction': Decimal(0)}}
-            tx_hash = pos_gen_hash
-            pos_in = query_multi('SELECT address,value_in FROM tx_in WHERE tx_hash = %s', tx_hash)
-            for inrow in pos_in:
-                base_txin[inrow[0]] = inrow[1]
-            coinbase_out = query_multi('SELECT address,value FROM tx_out WHERE tx_hash = %s', tx_hash)
-        else:
-            base_txin['POW Generation'] = query_single('SELECT value_in FROM tx_in WHERE coinbase != "0" AND height = %s', height)[0]
-            coinbase_out = query_multi('SELECT address,value FROM tx_out WHERE tx_hash = %s', tx_hash)
+        base_txin['PoC Fees'] = query_single('SELECT value_in FROM tx_in WHERE coinbase != "0" AND height = %s', height)[0]
+        coinbase_out = query_multi('SELECT address,value FROM tx_out WHERE tx_hash = %s', tx_hash)
         for outrow in coinbase_out:
             if outrow[0] != 'Unknown':
                 if outrow[0] in base_txout:
@@ -226,11 +219,11 @@ def get_block(block):
         # The return dict is global to simplify the two function nature of the block page display generation.
         global transactions
         transactions = OrderedDict()
-        get_coinbase(blk[0], blk[9])
+        get_coinbase(blk[0])
         temp_txin = {}
         temp_txout = {}
         # Only get hashes of transactions that are not related to coinbase as those are parsed by get_coinbase
-        txhash = query_multi('SELECT tx_hash FROM tx_in WHERE height = %s AND coinbase = "0" AND tx_hash != %s GROUP BY tx_hash', blk[0], blk[9])
+        txhash = query_multi('SELECT tx_hash FROM tx_in WHERE height = %s AND coinbase = "0" GROUP BY tx_hash', blk[0])
         # txhash will be None if only coinbase transactions exist in the block
         if txhash:
             for row in txhash:
@@ -257,7 +250,27 @@ def get_block(block):
                 transactions[row[0]] = {'txin': temp_txin, 'txout': temp_txout}
                 temp_txin = {}
                 temp_txout = {}
-        return {'Status': 'ok', 'blk': blk, 'transactions': transactions}
+
+        cvns = []
+
+        cvnrows = query_multi('SELECT nodeId, heightAdded, pubKey FROM cvn WHERE height = %s ORDER BY heightAdded', blk[0])
+        if cvnrows:
+            for row in cvnrows:
+                cvns.append({'nodeId': row[0], 'heightAdded': row[1], 'pubKey': row[2] })
+
+        chainParameter = {}
+        params = query_single('SELECT version,minCvnSigners,maxCvnSigners,blockSpacing,blockSpacingGracePeriod,dustThreshold,minSuccessiveSignatures FROM chainParameter WHERE height = %s', blk[0])
+
+        if params:
+            chainParameter['version'] = params[0]
+            chainParameter['minCvnSigners'] = params[1]
+            chainParameter['maxCvnSigners'] = params[2]
+            chainParameter['blockSpacing'] = params[3]
+            chainParameter['blockSpacingGracePeriod'] = params[4]
+            chainParameter['dustThreshold'] = params[5]
+            chainParameter['minSuccessiveSignatures'] = params[6]
+
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff)}
     except Exception as e:
         print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}

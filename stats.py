@@ -37,7 +37,7 @@ def main():
         # Process rich list
         lgth = int(CONFIG['stat']['richlistlen'])
         topadd = query_multi('SELECT * FROM address ORDER BY balance DESC LIMIT %s', lgth)
-        for i in range(lgth):
+        for i in range(min(lgth,len(topadd))):
             ret = query_noreturn(
                 'UPDATE top_address SET address = %s, balance = %s, n_tx = %s WHERE rank = %s',
                 topadd[i][0], topadd[i][1], topadd[i][2], i + 1)
@@ -49,15 +49,6 @@ def main():
             raise Exception(errstr)
         else:
             getinfo = ret['Data']
-        ret = jsonrpc('getmininginfo')
-        if ret['Status'] == 'error':
-            errstr = 'getmininginfo: ' + str(ret['Data'])
-            raise Exception(errstr)
-        else:
-            getmininginfo = ret['Data']
-
-        # Difficulty record
-        ret = query_noreturn('UPDATE stats SET curr_diff = %s', getinfo['difficulty'])
 
         # Coins minted record. Get information from coin daemon if indicated in the configuration file.
         # If 'calc' is indicated, sum all the address balances to get the information.
@@ -66,15 +57,6 @@ def main():
             ret = query_noreturn('UPDATE stats SET total_mint = %s', getinfo[mintfield])
         elif CONFIG['stat']['mint'] == 'calc':
             ret = query_noreturn('UPDATE stats SET total_mint = (SELECT SUM(balance) FROM address)')
-
-
-        # Network hash record
-        if CONFIG['stat']['hashrate'] == 'true':
-            nethash_d = getmininginfo[CONFIG['stat']['hashfield']]
-            nethash = Decimal(nethash_d) * Decimal(CONFIG['stat']['hashmult'])
-            ret = query_noreturn('UPDATE stats SET curr_net_hash = %s', nethash)
-
-
 
         # Daemon peer information
         ret = jsonrpc('getpeerinfo')

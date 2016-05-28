@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.43, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.49, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: opensource
+-- Host: localhost    Database: cce
 -- ------------------------------------------------------
--- Server version	5.5.43-0ubuntu0.14.04.1
+-- Server version	5.5.49-0ubuntu0.14.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -24,21 +24,12 @@ DROP TABLE IF EXISTS `address`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `address` (
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT 'Not Available',
-  `balance` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `balance` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` int(6) NOT NULL DEFAULT '0',
   PRIMARY KEY (`address`),
   KEY `balance` (`balance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `address`
---
-
-LOCK TABLES `address` WRITE;
-/*!40000 ALTER TABLE `address` DISABLE KEYS */;
-/*!40000 ALTER TABLE `address` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `block`
@@ -51,16 +42,17 @@ CREATE TABLE `block` (
   `height` mediumint(9) NOT NULL DEFAULT '-1',
   `hash` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `time` int(10) NOT NULL DEFAULT '0',
-  `nonce` bigint(20) NOT NULL DEFAULT '0',
-  `bits` varchar(9) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `difficulty` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `creator` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `nSignatures` mediumint(9) NOT NULL DEFAULT '0',
+  `nAdminSignatures` mediumint(9) NOT NULL DEFAULT '0',
+  `payload` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `creatorSignature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `pos` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `total_fee` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `total_fee` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
-  `total_sent` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `total_sent` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `raw` text COLLATE utf8_bin,
   PRIMARY KEY (`height`),
   KEY `hash` (`hash`)
@@ -68,13 +60,40 @@ CREATE TABLE `block` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `block`
+-- Table structure for table `chainParameter`
 --
 
-LOCK TABLES `block` WRITE;
-/*!40000 ALTER TABLE `block` DISABLE KEYS */;
-/*!40000 ALTER TABLE `block` ENABLE KEYS */;
-UNLOCK TABLES;
+DROP TABLE IF EXISTS `chainParameter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chainParameter` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `version` int(11) NOT NULL DEFAULT '0',
+  `minCvnSigners` mediumint(9) NOT NULL DEFAULT '0',
+  `maxCvnSigners` mediumint(9) NOT NULL DEFAULT '0',
+  `blockSpacing` mediumint(9) NOT NULL DEFAULT '0',
+  `blockSpacingGracePeriod` mediumint(9) NOT NULL DEFAULT '0',
+  `dustThreshold` mediumint(9) NOT NULL DEFAULT '0',
+  `minSuccessiveSignatures` mediumint(9) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cvn`
+--
+
+DROP TABLE IF EXISTS `cvn`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cvn` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `heightAdded` mediumint(9) NOT NULL DEFAULT '-1',
+  `pubKey` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`height`,`nodeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `large_tx`
@@ -85,18 +104,9 @@ DROP TABLE IF EXISTS `large_tx`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `large_tx` (
   `tx` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `amount` decimal(30,12) NOT NULL DEFAULT '0.000000000000'
+  `amount` decimal(16,8) NOT NULL DEFAULT '0.00000000'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `large_tx`
---
-
-LOCK TABLES `large_tx` WRITE;
-/*!40000 ALTER TABLE `large_tx` DISABLE KEYS */;
-/*!40000 ALTER TABLE `large_tx` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `orph_block`
@@ -109,30 +119,22 @@ CREATE TABLE `orph_block` (
   `height` mediumint(9) NOT NULL DEFAULT '-1',
   `hash` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `time` int(10) NOT NULL DEFAULT '0',
-  `nonce` bigint(20) NOT NULL DEFAULT '0',
-  `bits` varchar(9) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `difficulty` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `creator` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `nSignatures` mediumint(9) NOT NULL DEFAULT '0',
+  `nAdminSignatures` mediumint(9) NOT NULL DEFAULT '0',
+  `payload` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `creatorSignature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `pos` tinyint(1) NOT NULL DEFAULT '0',
-  `total_fee` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `total_fee` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
-  `total_sent` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `total_sent` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `raw` text COLLATE utf8_bin,
   KEY `hash` (`hash`),
   KEY `height` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `orph_block`
---
-
-LOCK TABLES `orph_block` WRITE;
-/*!40000 ALTER TABLE `orph_block` DISABLE KEYS */;
-/*!40000 ALTER TABLE `orph_block` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `orph_tx_in`
@@ -148,7 +150,7 @@ CREATE TABLE `orph_tx_in` (
   `vout` int(4) NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `hex` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `value_in` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `value_in` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `height` mediumint(9) NOT NULL DEFAULT '0',
   KEY `address` (`address`),
@@ -156,15 +158,6 @@ CREATE TABLE `orph_tx_in` (
   KEY `tx_hash` (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `orph_tx_in`
---
-
-LOCK TABLES `orph_tx_in` WRITE;
-/*!40000 ALTER TABLE `orph_tx_in` DISABLE KEYS */;
-/*!40000 ALTER TABLE `orph_tx_in` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `orph_tx_out`
@@ -176,7 +169,7 @@ DROP TABLE IF EXISTS `orph_tx_out`;
 CREATE TABLE `orph_tx_out` (
   `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `n` int(4) NOT NULL DEFAULT '0',
-  `value` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `value` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `type` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
@@ -186,15 +179,6 @@ CREATE TABLE `orph_tx_out` (
   KEY `tx_hash` (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `orph_tx_out`
---
-
-LOCK TABLES `orph_tx_out` WRITE;
-/*!40000 ALTER TABLE `orph_tx_out` DISABLE KEYS */;
-/*!40000 ALTER TABLE `orph_tx_out` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `orph_tx_raw`
@@ -214,15 +198,6 @@ CREATE TABLE `orph_tx_raw` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `orph_tx_raw`
---
-
-LOCK TABLES `orph_tx_raw` WRITE;
-/*!40000 ALTER TABLE `orph_tx_raw` DISABLE KEYS */;
-/*!40000 ALTER TABLE `orph_tx_raw` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `peers`
 --
 
@@ -237,15 +212,6 @@ CREATE TABLE `peers` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `peers`
---
-
-LOCK TABLES `peers` WRITE;
-/*!40000 ALTER TABLE `peers` DISABLE KEYS */;
-/*!40000 ALTER TABLE `peers` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `stats`
 --
 
@@ -253,24 +219,13 @@ DROP TABLE IF EXISTS `stats`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `stats` (
-  `curr_net_hash` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
-  `curr_diff` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
-  `total_mint` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `total_mint` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `peers` int(4) NOT NULL DEFAULT '0',
   `peer_txt` text COLLATE utf8_bin NOT NULL,
   `db_version` decimal(4,2) NOT NULL DEFAULT '4.10',
   PRIMARY KEY (`db_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `stats`
---
-
-LOCK TABLES `stats` WRITE;
-/*!40000 ALTER TABLE `stats` DISABLE KEYS */;
-/*!40000 ALTER TABLE `stats` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `top_address`
@@ -282,21 +237,12 @@ DROP TABLE IF EXISTS `top_address`;
 CREATE TABLE `top_address` (
   `rank` smallint(3) NOT NULL DEFAULT '0',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT ' Not Available',
-  `balance` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `balance` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` int(6) NOT NULL DEFAULT '0',
   PRIMARY KEY (`rank`),
   KEY `rank` (`rank`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `top_address`
---
-
-LOCK TABLES `top_address` WRITE;
-/*!40000 ALTER TABLE `top_address` DISABLE KEYS */;
-/*!40000 ALTER TABLE `top_address` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tx_in`
@@ -312,7 +258,7 @@ CREATE TABLE `tx_in` (
   `vout` int(4) NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `hex` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `value_in` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `value_in` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `height` mediumint(9) NOT NULL DEFAULT '0',
   KEY `address` (`address`),
@@ -320,15 +266,6 @@ CREATE TABLE `tx_in` (
   KEY `tx_hash` (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tx_in`
---
-
-LOCK TABLES `tx_in` WRITE;
-/*!40000 ALTER TABLE `tx_in` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tx_in` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tx_out`
@@ -340,7 +277,7 @@ DROP TABLE IF EXISTS `tx_out`;
 CREATE TABLE `tx_out` (
   `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `n` int(4) NOT NULL DEFAULT '0',
-  `value` decimal(30,12) NOT NULL DEFAULT '0.000000000000',
+  `value` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `type` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
@@ -350,15 +287,6 @@ CREATE TABLE `tx_out` (
   KEY `tx_hash` (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tx_out`
---
-
-LOCK TABLES `tx_out` WRITE;
-/*!40000 ALTER TABLE `tx_out` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tx_out` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `tx_raw`
@@ -376,15 +304,6 @@ CREATE TABLE `tx_raw` (
   KEY `height` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tx_raw`
---
-
-LOCK TABLES `tx_raw` WRITE;
-/*!40000 ALTER TABLE `tx_raw` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tx_raw` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -395,4 +314,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-06-28  8:14:42
+-- Dump completed on 2016-05-28 12:56:17

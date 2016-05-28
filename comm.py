@@ -41,7 +41,7 @@ import pymysql
 filterwarnings(CONFIG['loader']['truncwarn'],category=pymysql.Warning)
 
 # Setup RPC URL and database connection
-URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@127.0.0.1:' + CONFIG["coind"][
+URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@' + CONFIG["coind"]["rpchost"] + ':' + CONFIG["coind"][
     "rpcport"])
 conn = pymysql.connect(db=CONFIG['database']['dbname'], host=CONFIG['database']['mysqlip'], port=int(CONFIG['database']['mysqlport']), user=CONFIG['database']['dbuser'],
                        passwd=CONFIG['database']['dbpassword'])
@@ -60,7 +60,7 @@ def jsonrpc(method, *params):
         payload = json.dumps({"method": method, 'params': params, 'jsonrpc': '2.0'})
         # Cowtime for daemon RPC response set to timeout value in configuration
         with timeout(int(CONFIG['loader']['rpctimeout']), exception=Exception('Connection Timeout')):
-            response = requests.get(URL, headers=headers, data=payload)
+            response = requests.post(URL, headers=headers, data=payload)
             if response.status_code != requests.codes.ok:
                 return {'Status': 'error', 'Data': response.status_code}
         if response.json()['error']:
