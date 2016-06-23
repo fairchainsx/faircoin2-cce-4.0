@@ -64,7 +64,7 @@ def accounting(address, amount, credit, count_tx):
     try:
         ret = query_single('SELECT balance FROM address WHERE address = %s', address)
         if ret is None:
-            ret = query_noreturn('INSERT INTO address (address,balance) VALUES(%s,%s)', address, amount)
+            ret = query_noreturn('INSERT INTO address (address,balance) VALUES(%s,%s)', address, "{:.8f}".format(amount))
             conn.commit()
         else:
             if credit:
@@ -73,7 +73,7 @@ def accounting(address, amount, credit, count_tx):
                 balance = Decimal(ret[0] - amount)
                 if balance < 0:
                     balance = Decimal(0)
-            ret = query_noreturn('UPDATE address SET balance = %s WHERE address = %s', balance, address)
+            ret = query_noreturn('UPDATE address SET balance = %s WHERE address = %s', "{:.8f}".format(balance), address)
         if count_tx == 'add':
             ret = query_noreturn('UPDATE address SET n_tx = n_tx + 1 WHERE address = %s', address)
         elif count_tx == 'subtract':
@@ -248,6 +248,7 @@ def main(argv):
     recheckdir = str(os.getcwd() + "/" + "recheck")
     startmode = startcheck(lockdir, recheckdir)
     verbose = False
+    doWait = True
     # Set cowtime (loader timeout) to 5 minutes
     cowtime = 60 * 5
     try:
@@ -262,6 +263,9 @@ def main(argv):
             # Send verbose messages to stderr if -v flag
             elif opt == '-v':
                 verbose = True
+            # Wait
+            elif opt == '-w':
+                doWait = False
             # Set cowtime to 24 hours if -l flag
             elif opt == '-l':
                 cowtime = 60 * 60 * 24
@@ -283,7 +287,7 @@ def main(argv):
                 raise Exception(daemon['Data'])
 
             # Sleep is needed to allow the daemon time to catch orphans
-            if startmode != 'newdb':
+            if startmode != 'newdb' and doWait:
                 time.sleep(3)
 
             # Recheck mode, re-parse the last 5 blocks in the database
@@ -301,6 +305,7 @@ def main(argv):
                     db_hash = query_single('SELECT hash FROM block where height = %s', blk)[0]
                     if d_hash['Data'] != db_hash:
                         orphan(blk)
+
 
             # Genesis block TX needs to be entered manually. Process block information only
             if startmode == 'newdb':

@@ -259,16 +259,17 @@ def get_block(block):
                 cvns.append({'nodeId': row[0], 'heightAdded': row[1], 'pubKey': row[2] })
 
         chainParameter = {}
-        params = query_single('SELECT version,minCvnSigners,maxCvnSigners,blockSpacing,blockSpacingGracePeriod,dustThreshold,minSuccessiveSignatures FROM chainParameter WHERE height = %s', blk[0])
+        params = query_single('SELECT version,minAdminSigs,maxAdminSigs,blockSpacing,blockSpacingGracePeriod,transactionFee,dustThreshold,minSuccessiveSignatures FROM chainParameter WHERE height = %s', blk[0])
 
         if params:
             chainParameter['version'] = params[0]
-            chainParameter['minCvnSigners'] = params[1]
-            chainParameter['maxCvnSigners'] = params[2]
+            chainParameter['minAdminSigs'] = params[1]
+            chainParameter['maxAdminSigs'] = params[2]
             chainParameter['blockSpacing'] = params[3]
             chainParameter['blockSpacingGracePeriod'] = params[4]
-            chainParameter['dustThreshold'] = params[5]
-            chainParameter['minSuccessiveSignatures'] = params[6]
+            chainParameter['transactionFee'] = params[5]
+            chainParameter['dustThreshold'] = params[6]
+            chainParameter['minSuccessiveSignatures'] = params[7]
 
         return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff)}
     except Exception as e:

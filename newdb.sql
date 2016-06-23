@@ -69,11 +69,12 @@ DROP TABLE IF EXISTS `chainParameter`;
 CREATE TABLE `chainParameter` (
   `height` mediumint(9) NOT NULL DEFAULT '-1',
   `version` int(11) NOT NULL DEFAULT '0',
-  `minCvnSigners` mediumint(9) NOT NULL DEFAULT '0',
-  `maxCvnSigners` mediumint(9) NOT NULL DEFAULT '0',
+  `minAdminSigs` mediumint(9) NOT NULL DEFAULT '0',
+  `maxAdminSigs` mediumint(9) NOT NULL DEFAULT '0',
   `blockSpacing` mediumint(9) NOT NULL DEFAULT '0',
   `blockSpacingGracePeriod` mediumint(9) NOT NULL DEFAULT '0',
-  `dustThreshold` mediumint(9) NOT NULL DEFAULT '0',
+  `transactionFee` int(16) NOT NULL DEFAULT '0',
+  `dustThreshold` int(16) NOT NULL DEFAULT '0',
   `minSuccessiveSignatures` mediumint(9) NOT NULL DEFAULT '0',
   PRIMARY KEY (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
