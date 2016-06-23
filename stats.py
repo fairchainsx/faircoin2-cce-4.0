@@ -70,8 +70,8 @@ def main():
             # Remove port information as it is not useful information.
             # Only information after the last ':' is removed to accommodate IPV6 addresses
             address = row['addr'].rsplit(':',1)[0]
-            ret = query_noreturn('INSERT INTO peers (IP,version,sub) VALUES(%s,%s,%s)', address, row['version'],
-                                 row['subver'])
+            ret = query_noreturn('INSERT INTO peers (IP,version,sub, connection) VALUES(%s,%s,%s,%s)', address, row['version'],
+                                 row['subver'], 'inbound' if row['inbound'] else 'outbound')
         peertxt =  json.dumps(peers, sort_keys=False, indent=1)
         ret = query_noreturn('UPDATE stats SET peers = %s, peer_txt = %s', len(peers), peertxt)
 

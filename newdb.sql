@@ -208,6 +208,7 @@ DROP TABLE IF EXISTS `peers`;
 CREATE TABLE `peers` (
   `IP` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `version` int(10) NOT NULL DEFAULT '0',
+  `connection` varchar(16) COLLATE utf8_bin NOT NULL DEFAULT '',
   `sub` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;

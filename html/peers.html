@@ -11,12 +11,13 @@
             <thead>
                 <th>IP Address</th>
                 <th>Client Version</th>
+                <th>Connection</th>
                 <th>Sub Version</th>
             </thead>
          <tbody>
          {% for row in peerinfo.Data %}
          <tr>
-        <td>{{ row[0] }}</td><td>{{ row[1] }}</td><td>{{ row[2] }}</td></tr>
+        <td>{{ row[0] }}</td><td>{{ row[1] }}</td><td>{{ row[2] }}</td><td>{{ row[3] }}</td></tr>
         {% endfor %}
              </tbody>
 

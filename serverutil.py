@@ -48,7 +48,7 @@ pool = PooledDB(pymysql, 50, db=CONFIG['database']['dbname'], host=CONFIG['datab
 def format_time(nTime):
     try:
 
-        return time.strftime('%m-%d-%y | %H:%M:%S', time.gmtime(int(nTime)))
+        return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(int(nTime)))
     except:
         return "???"
 
@@ -146,7 +146,7 @@ def query_noreturn(sql, *parms):
 def homepage():
     try:
         stats = query_single('SELECT * FROM stats')
-        topblocks = query_multi('SELECT * FROM block ORDER BY height DESC LIMIT 10')
+        topblocks = query_multi('SELECT * FROM block ORDER BY height DESC LIMIT 100')
         return {'Status': 'ok', 'stats': stats, 'topblocks': topblocks}
     except Exception as e:
         print >> sys.stderr, e, 'Homepage'
