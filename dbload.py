@@ -22,6 +22,7 @@
 
 import sys
 import stats
+import traceback
 from comm import *
 from decimal import *
 
@@ -342,6 +343,11 @@ def main(argv):
 
 
     except Exception as e:
+        print "Exception in user code:"
+        print '-'*60
+        traceback.print_exc(file=sys.stdout)
+        print '-'*60
+
         loader_error_log(str(e), 'Main loop')
         conn.close()
         os.remove(os.path.expanduser(lockdir))
