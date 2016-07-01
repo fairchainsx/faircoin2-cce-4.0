@@ -23,10 +23,11 @@
     Height: {{ block.blk[0] }} <br>
     Hash: {{ block.blk[1] }} <br>
     Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br>
-    Creator ID: {{ block.blk[3] }}<br>
+    Creator ID: {% if block.creatorAlias %} <strong>{{ block.creatorAlias[0] }}</strong> <small>({{ block.blk[3] }})</small>{% else%}{{ block.blk[3] }}{%endif%}<br>
     Creator Signature: {{ block.blk[7] }}<br>
     Signatures: {{ block.blk[4] }}<br>
-    Admin signatures: {{ block.blk[5] }}<br>
+    Admin signatures: {{ block.blk[5] }} (<a class="showSigs" data-height="{{ block.blk[0] }}" href="/getsigs">Show</a>)<br>
+<div id="sigs"></div>
     Payload: {{ block.blk[6] }}<br>
     Transactions: {{ block.blk[12] }} <br>
     Total Sent: {{ block.blk[13] | normalize }} <br>
@@ -78,7 +79,7 @@
 
     {% for cvn in block.cvns %}
     <tr>
-       <td>{{ cvn['nodeId'] }}</td>
+       <td>{% if cvn['alias'] %}<strong>{{ cvn['alias'] }}</strong><br/><small>{{ cvn['nodeId'] }}</small>{% else %}{{ cvn['nodeId'] }}{%endif%}</td>
        <td>{{ cvn['heightAdded'] }}</td>
        <td>{{ cvn['pubKey'] }}</td>
     </tr>
@@ -114,5 +115,28 @@
 
 
 {% endif %}
-
+<script>
+$('a.showSigs').click(function(event) {
+   event.preventDefault();
+ 
+   $.ajax({
+   url: '/getsigs?block={{block.blk[0]}}',
+   data: {
+      format: 'json'
+   },
+   error: function() {
+      $('#info').html('<p>An error has occurred</p>');
+   },
+   dataType: 'jsonp',
+   success: function(data) {
+      var $title = $('<h1>').text(data.talks[0].talk_title);
+      var $description = $('<p>').text(data.talks[0].talk_description);
+      $('#sigs')
+         .append($title)
+         .append($description);
+   },
+   type: 'GET'
+});
+});
+</script>
 {% endblock %}

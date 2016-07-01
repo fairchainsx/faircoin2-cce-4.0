@@ -123,6 +123,20 @@ class explorer:
             raise cherrypy.HTTPError(503)
 
     @cherrypy.expose
+    def activecvns(self, **args):
+        try:
+            cvns = get_active_cvns()
+            template = templateEnv.get_template('cvns.html')
+            templateVars = {
+                    'cvns': cvns,
+                    'name': CONFIG['chain']['name']
+                        }
+            return template.render(templateVars)
+        except Exception as e:
+            print >> sys.stderr, e , 'Cvns page'
+            raise cherrypy.HTTPError(503)
+
+    @cherrypy.expose
     def transaction(self, **args):
         try:
             transaction = get_transaction(args['transaction'])
@@ -174,6 +188,10 @@ class explorer:
                 difficulty = {'difficulty': diff_q[0]}
                 return json.dumps(difficulty)
             elif command == 'totalmint':
+                total_m = query_single('SELECT total_mint FROM stats')
+                minted = {'total minted': total_m[0]}
+                return json.dumps(minted)
+            elif command == 'sigs4block':
                 total_m = query_single('SELECT total_mint FROM stats')
                 minted = {'total minted': total_m[0]}
                 return json.dumps(minted)

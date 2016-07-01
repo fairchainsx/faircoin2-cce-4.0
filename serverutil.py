@@ -146,7 +146,7 @@ def query_noreturn(sql, *parms):
 def homepage():
     try:
         stats = query_single('SELECT * FROM stats')
-        topblocks = query_multi('SELECT * FROM block ORDER BY height DESC LIMIT 100')
+        topblocks = query_multi('SELECT b.*,a.alias FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator ORDER BY height DESC LIMIT 100')
         return {'Status': 'ok', 'stats': stats, 'topblocks': topblocks}
     except Exception as e:
         print >> sys.stderr, e, 'Homepage'
@@ -216,6 +216,8 @@ def get_block(block):
         # Genesis block transaction parsing is skipped
         if blk[0] == 0:
             return {'Status': 'ok', 'blk': blk, 'transactions': None}
+
+        creatorAlias = query_single('SELECT alias FROM cvnalias WHERE nodeId = %s', blk[3])
         # The return dict is global to simplify the two function nature of the block page display generation.
         global transactions
         transactions = OrderedDict()
@@ -253,10 +255,10 @@ def get_block(block):
 
         cvns = []
 
-        cvnrows = query_multi('SELECT nodeId, heightAdded, pubKey FROM cvn WHERE height = %s ORDER BY heightAdded', blk[0])
+        cvnrows = query_multi('SELECT c.nodeId, c.heightAdded, c.pubKey, a.alias FROM cvn c LEFT JOIN cvnalias a on a.nodeId = c.nodeId WHERE c.height = %s ORDER BY c.heightAdded', blk[0])
         if cvnrows:
             for row in cvnrows:
-                cvns.append({'nodeId': row[0], 'heightAdded': row[1], 'pubKey': row[2] })
+                cvns.append({'nodeId': row[0], 'heightAdded': row[1], 'pubKey': row[2] , 'alias': row[3]})
 
         chainParameter = {}
         params = query_single('SELECT version,minAdminSigs,maxAdminSigs,blockSpacing,blockSpacingGracePeriod,transactionFee,dustThreshold,minSuccessiveSignatures FROM chainParameter WHERE height = %s', blk[0])
@@ -271,7 +273,7 @@ def get_block(block):
             chainParameter['dustThreshold'] = params[6]
             chainParameter['minSuccessiveSignatures'] = params[7]
 
-        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff)}
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff), 'creatorAlias': creatorAlias}
     except Exception as e:
         print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}
@@ -314,6 +316,22 @@ def get_rich():
 
     except Exception as e:
         print >> sys.stderr, e, 'Rich List'
+        return {'Status': 'error', 'Data': 'Unknown error'}
+
+
+def get_active_cvns():
+    try:
+        cvns = query_multi(
+                    'SELECT s.nodeId, s.heightAdded, s.pubKey, s.predictedNextBlock, s.lastBlocksSigned, a.alias FROM cvnstatus as s '
+                    'LEFT JOIN cvnalias as a on a.nodeId = s.nodeId '
+                    'ORDER BY s.heightAdded')
+        if cvns is None:
+            return {'Status': 'error', 'Data': 'Not Found'}
+        else:
+            return {'Status': 'OK', 'Data': cvns}
+
+    except Exception as e:
+        print >> sys.stderr, e, 'Active CVNs List'
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+
+<br />
+<div class="jumbotron">
+    &nbsp;&nbsp;
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+    {% if cvns.Status != "error" %}
+    <h2>Currently active CVNs {{ cvns.Data | length }}</h2>
+    </div>
+    <div class="container-fluid table-responsive">
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>CVN ID</th>
+            <th>Height added</th>
+            <th>PredictedNextBlock</th>
+            <th>Number of Signatures<br/>(during the last 10 blocks)</th>
+            <th>Public key</th>
+        </thead>
+     <tbody>
+
+    {% for row in cvns.Data %}
+    <tr>
+       <td>{% if row[5] %}<strong>{{ row[5] }}</strong><br/><small>{{ row[0] }}</small>{% else %}{{ row[0] }}{%endif%}</td>
+       <td>{{ row[1] }}</td>
+       <td>{{ row[3] }}</td>
+       <td>{{ row[4] }}</td>
+       <td>{{ row[2] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
+
+{% else %}
+    <h1 style="text-align:center;">Active CVNs was not found.</h1></div>
+
+
+{% endif %}
+
+
+{% endblock %}

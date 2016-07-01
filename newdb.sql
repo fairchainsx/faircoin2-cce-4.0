@@ -32,6 +32,22 @@ CREATE TABLE `address` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `adminSignatures`
+--
+
+DROP TABLE IF EXISTS `adminSignatures`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `adminSignatures` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `version` mediumint(9) NOT NULL DEFAULT '0',
+  `adminId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `signature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`height`,`adminId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `block`
 --
 
@@ -93,6 +109,37 @@ CREATE TABLE `cvn` (
   `heightAdded` mediumint(9) NOT NULL DEFAULT '-1',
   `pubKey` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`height`,`nodeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cvnalias`
+--
+
+DROP TABLE IF EXISTS `cvnalias`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cvnalias` (
+  `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `alias` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`nodeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `cvnstatus`
+--
+
+DROP TABLE IF EXISTS `cvnstatus`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cvnstatus` (
+  `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `heightAdded` mediumint(9) NOT NULL DEFAULT '-1',
+  `pubKey` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `predictedNextBlock` mediumint(9) NOT NULL DEFAULT '-1',
+  `lastBlocksSigned` mediumint(8) NOT NULL DEFAULT '-1',
+  PRIMARY KEY (`nodeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -214,6 +261,22 @@ CREATE TABLE `peers` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `signatures`
+--
+
+DROP TABLE IF EXISTS `signatures`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `signatures` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `version` mediumint(9) NOT NULL DEFAULT '0',
+  `signerId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `signature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`height`,`signerId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `stats`
 --
 
@@ -224,6 +287,8 @@ CREATE TABLE `stats` (
   `total_mint` decimal(16,8) NOT NULL DEFAULT '0.00000000',
   `peers` int(4) NOT NULL DEFAULT '0',
   `peer_txt` text COLLATE utf8_bin NOT NULL,
+  `cvns` int(4) NOT NULL DEFAULT '0',
+  `cvn_txt` text COLLATE utf8_bin NOT NULL,
   `db_version` decimal(4,2) NOT NULL DEFAULT '4.10',
   PRIMARY KEY (`db_version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -316,4 +381,4 @@ CREATE TABLE `tx_raw` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-05-28 12:56:17
+-- Dump completed on 2016-07-01 16:11:07

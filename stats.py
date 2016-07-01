@@ -75,6 +75,20 @@ def main():
         peertxt =  json.dumps(peers, sort_keys=False, indent=1)
         ret = query_noreturn('UPDATE stats SET peers = %s, peer_txt = %s', len(peers), peertxt)
 
+        # Daemon CVN information
+        ret = jsonrpc('getactivecvns')
+        if ret['Status'] == 'error':
+            errstr = str('Active CVNs: ' + ret['Data'])
+            raise Exception(errstr)
+        else:
+            cvns = ret['Data']['cvns']
+        ret = query_noreturn('TRUNCATE cvnstatus')
+
+        for row in cvns:
+            ret = query_noreturn('INSERT INTO cvnstatus (nodeId,heightAdded,pubKey,predictedNextBlock,lastBlocksSigned) VALUES(%s,%s,%s,%s,%s)',
+                            row['nodeId'], row['heightAdded'], row['pubKey'], row['predictedNextBlock'], row['lastBlocksSigned'])
+        cvnstxt =  json.dumps(cvns, sort_keys=False, indent=1)
+        ret = query_noreturn('UPDATE stats SET cvns = %s, cvn_txt = %s', len(cvns), cvnstxt)
         conn.commit()
 
 

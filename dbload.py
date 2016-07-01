@@ -99,24 +99,17 @@ def add_row(table, row_data):
 
 
 # Parse Transaction
-def process_tx(tx_hash, blk_height):
-    rawtx = jsonrpc("getrawtransaction", tx_hash)
-    if rawtx['Status'] == 'error':
-        loader_error_log(rawtx['Data'], str('Raw tx on block:' + blk_height))
-        return rawtx
-    decode = jsonrpc("decoderawtransaction", rawtx['Data'])
-    if decode['Status'] == 'error':
-        loader_error_log(decode['Data'], str('Decode tx on block:' + blk_height))
-        return decode
-    jsn_decode = json.dumps(decode['Data'])
-    ret = query_noreturn('INSERT INTO tx_raw (tx_hash,raw,decoded,height) VALUES(%s,%s,%s,%s)', tx_hash, rawtx['Data'],
+def process_tx(tx, blk_height):
+    jsn_decode = json.dumps(tx)
+    rawtx = jsonrpc("getrawtransaction", tx['txid'])
+    ret = query_noreturn('INSERT INTO tx_raw (tx_hash,raw,decoded,height) VALUES(%s,%s,%s,%s)', tx['txid'], rawtx['Data'],
                          jsn_decode, blk_height)
     total_out = Decimal(0)
     # Transaction addresses are stored in tx_address to determine duplicate addresses in tx_in / tx_out.
     # POS chains use the same address in both tx_in and tx_out for the generation transaction.
     # If a duplicate address is found, the tx count for address will only be incremented once.
     tx_address = []
-    for key in decode['Data']['vout']:
+    for key in tx['vout']:
         try:
             key['address'] = key['scriptPubKey']['addresses'][0]
             tx_address.append(key['address'])
@@ -126,7 +119,7 @@ def process_tx(tx_hash, blk_height):
         key['asm'] = key['scriptPubKey']['asm']
         key['type'] = key['scriptPubKey']['type']
         key['height'] = blk_height
-        key['tx_hash'] = tx_hash
+        key['tx_hash'] = tx['txid']
         key['raw'] = rawtx['Data']
         key['value'] = Decimal(key['value']).quantize(Decimal('1.00000000')).normalize()
         add_row('tx_out', key)
@@ -139,12 +132,12 @@ def process_tx(tx_hash, blk_height):
     try:
         low = query_single('SELECT * FROM large_tx ORDER BY amount ASC LIMIT 1')
         if total_out > low[1]:
-            ret = query_noreturn('UPDATE large_tx SET tx = %s,amount = %s WHERE tx = %s', tx_hash, total_out,low[0])
+            ret = query_noreturn('UPDATE large_tx SET tx = %s,amount = %s WHERE tx = %s', tx['txid'], total_out,low[0])
     # Exceptions in this block are non-fatal as the information value of the transaction itself far exceeds the value of large_tx
     except:
             pass
 
-    for key in decode['Data']['vin']:
+    for key in tx['vin']:
         try:
             key['asm'] = key['scriptSig']['asm']
             key['hex'] = key['scriptSig']['hex']
@@ -164,7 +157,7 @@ def process_tx(tx_hash, blk_height):
         # The value of tx_in and tx_out are always the same in these types of transactions
         except Exception:
             key['value_in'] = total_out
-        key['tx_hash'] = tx_hash
+        key['tx_hash'] = tx['txid']
         key['height'] = blk_height
         add_row('tx_in', key)
     return {'Status': 'ok', 'Data': {'out': total_out}}
@@ -178,11 +171,8 @@ def process_block(blk_height):
         counter = 0
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
-        block = jsonrpc("getblock", b_hash, 3)['Data']
-        # In POS chains, nonce is used to determine if a block is POS.
-        # The 'flags' field in the daemon output is unreliable due to different verbiage and multiple flags.
-        # Merged mine chains also use 0 in the nonce field. This system will not work with POS merged mined chains.
-        # POS merged mined compatibility will be added in the future
+        block = jsonrpc("getblock", b_hash, 5)['Data']
+
         for key in block['tx']:
             prostx = process_tx(key, blk_height)
             if prostx['Status'] == 'error':
@@ -190,6 +180,12 @@ def process_block(blk_height):
             total_sent = Decimal(total_sent + prostx['Data']['out'])
         block['raw'] = json.dumps(block, sort_keys=False, indent=1)
         add_row('block', block)
+
+        for sig in block['signatures']:
+            ret = query_noreturn('INSERT INTO signatures (height,version,signerId,signature) VALUES(%s,%s,%s,%s)', blk_height, sig['version'], sig['signerId'], sig['signature'])
+
+        for sig in block['adminSignatures']:
+            ret = query_noreturn('INSERT INTO adminSignatures (height,version,adminId,signature) VALUES(%s,%s,%s,%s)', blk_height, sig['version'], sig['adminId'], sig['signature'])
 
         for cvn in block['cvnInfo']:
             cvn['height'] = blk_height
