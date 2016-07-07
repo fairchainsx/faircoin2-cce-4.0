@@ -324,7 +324,7 @@ def get_active_cvns():
         cvns = query_multi(
                     'SELECT s.nodeId, s.heightAdded, s.pubKey, s.predictedNextBlock, s.lastBlocksSigned, a.alias FROM cvnstatus as s '
                     'LEFT JOIN cvnalias as a on a.nodeId = s.nodeId '
-                    'ORDER BY s.heightAdded')
+                    'ORDER BY s.predictedNextBlock')
         if cvns is None:
             return {'Status': 'error', 'Data': 'Not Found'}
         else:
