@@ -191,10 +191,18 @@ class explorer:
                 total_m = query_single('SELECT total_mint FROM stats')
                 minted = {'total minted': total_m[0]}
                 return json.dumps(minted)
-            elif command == 'sigs4block':
-                total_m = query_single('SELECT total_mint FROM stats')
-                minted = {'total minted': total_m[0]}
-                return json.dumps(minted)
+            elif command == 'getsigs':
+                if args.get('adm', 'False') == 'False':
+                    signatures = query_multi("SELECT signerId, signature FROM signatures where height = %s", args.get('block', '-1'))
+                else:
+                    signatures = query_multi("SELECT adminId, signature FROM adminSignatures where height = %s", args.get('block', '-1'))
+                data = []
+                if signatures:
+                    for row in signatures:
+                        data.append({'signer': row[0], 'sig': row[1]})
+                else:
+                    data.append({'signer': 'no data', 'sig': 'available'})
+                return json.dumps(data)
             return json.dumps({'error':'invalid'})
         except Exception:
             raise cherrypy.HTTPError(503)

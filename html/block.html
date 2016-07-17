@@ -25,9 +25,8 @@
     Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br>
     Creator ID: {% if block.creatorAlias %} <strong>{{ block.creatorAlias[0] }}</strong> <small>({{ block.blk[3] }})</small>{% else%}{{ block.blk[3] }}{%endif%}<br>
     Creator Signature: {{ block.blk[7] }}<br>
-    Signatures: {{ block.blk[4] }}<br>
-    Admin signatures: {{ block.blk[5] }} (<a class="showSigs" data-height="{{ block.blk[0] }}" href="/getsigs">Show</a>)<br>
-<div id="sigs"></div>
+    Signatures: {{ block.blk[4] }}{% if block.blk[4] %} (<a class="showSigs" href="#">Show</a>)<ul id="sigs"></ul>{%endif%}<br>
+    Admin signatures: {{ block.blk[5] }}{% if block.blk[5] %} (<a class="showAdmSigs" href="#">Show</a>)<ul id="admSigs"></ul>{%endif%}<br>
     Payload: {{ block.blk[6] }}<br>
     Transactions: {{ block.blk[12] }} <br>
     Total Sent: {{ block.blk[13] | normalize }} <br>
@@ -117,26 +116,71 @@
 {% endif %}
 <script>
 $('a.showSigs').click(function(event) {
-   event.preventDefault();
- 
-   $.ajax({
-   url: '/getsigs?block={{block.blk[0]}}',
-   data: {
-      format: 'json'
-   },
-   error: function() {
-      $('#info').html('<p>An error has occurred</p>');
-   },
-   dataType: 'jsonp',
-   success: function(data) {
-      var $title = $('<h1>').text(data.talks[0].talk_title);
-      var $description = $('<p>').text(data.talks[0].talk_description);
-      $('#sigs')
-         .append($title)
-         .append($description);
-   },
-   type: 'GET'
+    event.preventDefault();
+
+    if ($('a.showSigs').text() == 'Hide') {
+        $('a.showSigs').text('Show');
+        $('#sigs').html('');
+        $('a.showSigs').blur();
+        return;
+    }
+
+    $.ajax({
+        url: '../api/getsigs?block={{block.blk[0]}}&adm=False',
+        data: {
+            format: 'json'
+        },
+        error: function() {
+            $('#sigs').html('<p>An error has occurred</p>');
+        },
+        dataType: 'json',
+        success: function(data) {
+            $.each(data, function(index, sig) {
+                var line = $('<li>');
+                
+                line.append($('<strong>').text(sig.signer));
+                line.append($('<span>').text(sig.sig));
+                $('#sigs').append(line);
+                $('a.showSigs').text('Hide');
+                $('a.showSigs').blur();
+            })
+        },
+        type: 'GET'
+    });
 });
+$('a.showAdmSigs').click(function(event) {
+    event.preventDefault();
+
+    if ($('a.showAdmSigs').text() == 'Hide') {
+        $('a.showAdmSigs').text('Show');
+        $('#admSigs').html('');
+        $('a.showAdmSigs').blur();
+        return;
+    }
+
+    $.ajax({
+        url: '../api/getsigs?block={{block.blk[0]}}&adm=True',
+        data: {
+            format: 'json'
+        },
+        error: function() {
+            $('#admSigs').html('<p>An error has occurred</p>');
+        },
+        dataType: 'json',
+        success: function(data) {
+            $.each(data, function(index, sig) {
+                var line = $('<li>');
+                
+                line.append($('<strong>').text(sig.signer));
+                line.append($('<span>').text(sig.sig));
+                $('#admSigs').append(line);
+                $('a.showAdmSigs').text('Hide');
+                $('a.showAdmSigs').blur();
+            })
+        },
+        type: 'GET'
+    });
 });
 </script>
 {% endblock %}
+
