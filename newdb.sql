@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `address`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `address` (
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT 'Not Available',
-  `balance` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `balance` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` int(6) NOT NULL DEFAULT '0',
   PRIMARY KEY (`address`),
   KEY `balance` (`balance`)
@@ -66,9 +66,9 @@ CREATE TABLE `block` (
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `total_fee` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
-  `total_sent` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `raw` text COLLATE utf8_bin,
   PRIMARY KEY (`height`),
   KEY `hash` (`hash`)
@@ -152,7 +152,7 @@ DROP TABLE IF EXISTS `large_tx`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `large_tx` (
   `tx` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `amount` decimal(16,8) NOT NULL DEFAULT '0.00000000'
+  `amount` decimal(17,8) NOT NULL DEFAULT '0.00000000'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -175,9 +175,9 @@ CREATE TABLE `orph_block` (
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `total_fee` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
-  `total_sent` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `raw` text COLLATE utf8_bin,
   KEY `hash` (`hash`),
   KEY `height` (`height`)
@@ -198,7 +198,7 @@ CREATE TABLE `orph_tx_in` (
   `vout` int(4) NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `hex` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `value_in` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `value_in` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `height` mediumint(9) NOT NULL DEFAULT '0',
   KEY `address` (`address`),
@@ -217,7 +217,7 @@ DROP TABLE IF EXISTS `orph_tx_out`;
 CREATE TABLE `orph_tx_out` (
   `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `n` int(4) NOT NULL DEFAULT '0',
-  `value` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `value` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `type` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
@@ -284,7 +284,7 @@ DROP TABLE IF EXISTS `stats`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `stats` (
-  `total_mint` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `total_mint` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `peers` int(4) NOT NULL DEFAULT '0',
   `peer_txt` text COLLATE utf8_bin NOT NULL,
   `cvns` int(4) NOT NULL DEFAULT '0',
@@ -304,7 +304,7 @@ DROP TABLE IF EXISTS `top_address`;
 CREATE TABLE `top_address` (
   `rank` smallint(3) NOT NULL DEFAULT '0',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT ' Not Available',
-  `balance` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `balance` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` int(6) NOT NULL DEFAULT '0',
   PRIMARY KEY (`rank`),
   KEY `rank` (`rank`)
@@ -325,7 +325,7 @@ CREATE TABLE `tx_in` (
   `vout` int(4) NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `hex` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `value_in` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `value_in` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `height` mediumint(9) NOT NULL DEFAULT '0',
   KEY `address` (`address`),
@@ -344,7 +344,7 @@ DROP TABLE IF EXISTS `tx_out`;
 CREATE TABLE `tx_out` (
   `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `n` int(4) NOT NULL DEFAULT '0',
-  `value` decimal(16,8) NOT NULL DEFAULT '0.00000000',
+  `value` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `type` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `address` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `asm` varchar(256) COLLATE utf8_bin NOT NULL DEFAULT '0',

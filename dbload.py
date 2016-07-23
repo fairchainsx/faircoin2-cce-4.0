@@ -62,26 +62,23 @@ def loader_error_log(msg, function_name='No function name provided'):
 # Address accounting. If credit is true, amount is added to address, else amount is subtracted.
 # count_tx determines if the number of transactions on an account is incremented, decremented or unchanged.
 def accounting(address, amount, credit, count_tx):
-    try:
-        ret = query_single('SELECT balance FROM address WHERE address = %s', address)
-        if ret is None:
-            ret = query_noreturn('INSERT INTO address (address,balance) VALUES(%s,%s)', address, "{:.8f}".format(amount))
-            conn.commit()
-        else:
-            if credit:
-                balance = Decimal(ret[0] + amount)
-            else:
-                balance = Decimal(ret[0] - amount)
-                if balance < 0:
-                    balance = Decimal(0)
-            ret = query_noreturn('UPDATE address SET balance = %s WHERE address = %s', "{:.8f}".format(balance), address)
-        if count_tx == 'add':
-            ret = query_noreturn('UPDATE address SET n_tx = n_tx + 1 WHERE address = %s', address)
-        elif count_tx == 'subtract':
-            ret = query_noreturn('UPDATE address SET n_tx = abs(n_tx - 1) WHERE address = %s', address)
+    ret = query_single('SELECT balance FROM address WHERE address = %s', address)
+    if ret is None:
+        ret = query_noreturn('INSERT INTO address (address,balance) VALUES(%s,%s)', address, "{:.8f}".format(amount))
         conn.commit()
-    except Exception as e:
-        loader_error_log(e, "Accounting loop error")
+    else:
+        if credit:
+            balance = Decimal(ret[0] + amount)
+        else:
+            balance = Decimal(ret[0] - amount)
+            if balance < 0:
+                balance = Decimal(0)
+        ret = query_noreturn('UPDATE address SET balance = %s WHERE address = %s', "{:.8f}".format(balance), address)
+    if count_tx == 'add':
+        ret = query_noreturn('UPDATE address SET n_tx = n_tx + 1 WHERE address = %s', address)
+    elif count_tx == 'subtract':
+        ret = query_noreturn('UPDATE address SET n_tx = abs(n_tx - 1) WHERE address = %s', address)
+    conn.commit()
 
 
 # Place data in table rows
@@ -106,39 +103,36 @@ def process_tx(tx, blk_height):
                          jsn_decode, blk_height)
     total_out = Decimal(0)
     # Transaction addresses are stored in tx_address to determine duplicate addresses in tx_in / tx_out.
-    # POS chains use the same address in both tx_in and tx_out for the generation transaction.
     # If a duplicate address is found, the tx count for address will only be incremented once.
     tx_address = []
     for key in tx['vout']:
-        try:
+        hasAddresses = True if 'addresses' in key['scriptPubKey'] else False
+        if hasAddresses:
             key['address'] = key['scriptPubKey']['addresses'][0]
             tx_address.append(key['address'])
-        # KeyError is not fatal, as generation transactions have no tx_in address
-        except KeyError:
-            key['address'] = "Unknown"
         key['asm'] = key['scriptPubKey']['asm']
         key['type'] = key['scriptPubKey']['type']
         key['height'] = blk_height
         key['tx_hash'] = tx['txid']
         key['raw'] = rawtx['Data']
         key['value'] = Decimal(key['value']).quantize(Decimal('1.00000000')).normalize()
-        add_row('tx_out', key)
-        if key['address'] != 'Unknown':
+
+        if hasAddresses:
+            add_row('tx_out', key)
             accounting(key['address'], key['value'], True, 'add')
+
         conn.commit()
         total_out = Decimal(total_out + key['value'])
     # If the transaction total out is larger then the lowest entry on the large tx table,
     # replace the lowest transaction with this transaction
-    try:
-        low = query_single('SELECT * FROM large_tx ORDER BY amount ASC LIMIT 1')
-        if total_out > low[1]:
-            ret = query_noreturn('UPDATE large_tx SET tx = %s,amount = %s WHERE tx = %s', tx['txid'], total_out,low[0])
-    # Exceptions in this block are non-fatal as the information value of the transaction itself far exceeds the value of large_tx
-    except:
-            pass
+    low = query_single('SELECT * FROM large_tx ORDER BY amount ASC LIMIT 1')
+    if low is not None and total_out > low[1]:
+        ret = query_noreturn('UPDATE large_tx SET tx = %s,amount = %s WHERE tx = %s', tx['txid'], total_out,low[0])
 
     for key in tx['vin']:
-        try:
+        if 'coinbase' in key:
+            key['value_in'] = total_out
+        else:
             key['asm'] = key['scriptSig']['asm']
             key['hex'] = key['scriptSig']['hex']
             key['prev_out_hash'] = key['txid']
@@ -153,10 +147,7 @@ def process_tx(tx, blk_height):
                 if key['address'] in tx_address:
                     count_tx = 'no'
                 accounting(key['address'],key['value_in'],False,count_tx)
-        # Exceptions occur in this loop due to POW generation transactions.
-        # The value of tx_in and tx_out are always the same in these types of transactions
-        except Exception:
-            key['value_in'] = total_out
+
         key['tx_hash'] = tx['txid']
         key['height'] = blk_height
         add_row('tx_in', key)
@@ -165,7 +156,6 @@ def process_tx(tx, blk_height):
 
 # Parse block
 def process_block(blk_height):
-    try:
         if blk_height == -1:
             raise Exception('Bad block height (-1)')
         counter = 0
@@ -200,9 +190,7 @@ def process_block(blk_height):
         ret = query_noreturn('UPDATE block SET total_sent = %s, n_tx = %s WHERE height = %s',
                              total_sent, len(block['tx']), blk_height)
         conn.commit()
-    except Exception as e:
-        return {'Status':'error','Data':e}
-    return {'Status':'ok'}
+        return {'Status':'ok'}
 
 
 # Orphan correction. Copy to orphan tables,delete block/tx information, and re-parse block.
@@ -358,7 +346,5 @@ def main(argv):
     os.remove(os.path.expanduser(recheckdir))
     os.remove(os.path.expanduser(lockdir))
 
-
 if __name__ == '__main__':
     main(sys.argv[1:])
-
