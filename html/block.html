@@ -25,8 +25,8 @@
     Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br>
     Creator ID: {% if block.creatorAlias %} <strong>{{ block.creatorAlias[0] }}</strong> <small>({{ block.blk[3] }})</small>{% else%}{{ block.blk[3] }}{%endif%}<br>
     Creator Signature: {{ block.blk[7] }}<br>
-    Signatures: {{ block.blk[4] }}{% if block.blk[4] %} (<a class="showSigs" href="#">Show</a>)<ul id="sigs"></ul>{%endif%}<br>
-    Admin signatures: {{ block.blk[5] }}{% if block.blk[5] %} (<a class="showAdmSigs" href="#">Show</a>)<ul id="admSigs"></ul>{%endif%}<br>
+    Signatures: {{ block.blk[4] }}{% if block.blk[4] %} (<a class="showSigs" href="#">Show</a>)<ul id="sigs"></ul>{%else%}<br/>{%endif%}
+    Admin signatures: {{ block.blk[5] }}{% if block.blk[5] %} (<a class="showAdmSigs" href="#">Show</a>)<ul id="admSigs"></ul>{%else%}<br/>{%endif%}
     Payload: {{ block.blk[6] }}<br>
     Transactions: {{ block.blk[12] }} <br>
     Total Sent: {{ block.blk[13] | normalize }} <br>
@@ -135,11 +135,22 @@ $('a.showSigs').click(function(event) {
         },
         dataType: 'json',
         success: function(data) {
+            var cnt = 0;
             $.each(data, function(index, sig) {
-                var line = $('<li>');
-                
-                line.append($('<strong>').text(sig.signer));
+                var line = $("<li" + (cnt++ % 2 ? "" : " class='odd'") + ">");
+
+                if (sig.alias) {
+                    var signerDiv = $('<div>');
+                    signerDiv.append($('<strong>').text(sig.alias));
+                    signerDiv.append($('<small>').text('(' + sig.signer + ')'));
+                    line.append(signerDiv);
+                }  else {
+                    var signerDiv = $('<div>');
+                    signerDiv.append($('<strong>').text(sig.signer));
+                    line.append(signerDiv);
+                }
                 line.append($('<span>').text(sig.sig));
+                line.append('<br clear="all"/>');
                 $('#sigs').append(line);
                 $('a.showSigs').text('Hide');
                 $('a.showSigs').blur();
@@ -168,11 +179,22 @@ $('a.showAdmSigs').click(function(event) {
         },
         dataType: 'json',
         success: function(data) {
+            var cnt = 0;
             $.each(data, function(index, sig) {
-                var line = $('<li>');
-                
-                line.append($('<strong>').text(sig.signer));
+                var line = $("<li" + (cnt++ % 2 ? "" : " class='odd'") + ">");
+
+                if (sig.alias) {
+                    var signerDiv = $('<div>');
+                    signerDiv.append($('<strong>').text(sig.alias));
+                    signerDiv.append($('<small>').text('(' + sig.signer + ')'));
+                    line.append(signerDiv);
+                }  else {
+                    var signerDiv = $('<div>');
+                    signerDiv.append($('<strong>').text(sig.signer));
+                    line.append(signerDiv);
+                }
                 line.append($('<span>').text(sig.sig));
+                line.append('<br clear="all"/>');
                 $('#admSigs').append(line);
                 $('a.showAdmSigs').text('Hide');
                 $('a.showAdmSigs').blur();

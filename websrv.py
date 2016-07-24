@@ -193,13 +193,21 @@ class explorer:
                 return json.dumps(minted)
             elif command == 'getsigs':
                 if args.get('adm', 'False') == 'False':
-                    signatures = query_multi("SELECT signerId, signature FROM signatures where height = %s", args.get('block', '-1'))
+                    signatures = query_multi(
+                        "SELECT s.signerId, s.signature,a.alias FROM signatures s "
+                        "LEFT JOIN cvnalias a on s.signerId = a.nodeId "
+                        "where s.height = %s",
+                        args.get('block', '-1'))
                 else:
-                    signatures = query_multi("SELECT adminId, signature FROM adminSignatures where height = %s", args.get('block', '-1'))
+                    signatures = query_multi(
+                        "SELECT s.adminId, s.signature, a.alias FROM adminSignatures s "
+                        "LEFT JOIN cvnalias a on s.adminId = a.nodeId "
+                        "where height = %s",
+                        args.get('block', '-1'))
                 data = []
                 if signatures:
                     for row in signatures:
-                        data.append({'signer': row[0], 'sig': row[1]})
+                        data.append({'signer': row[0], 'sig': row[1], 'alias': row[2]})
                 else:
                     data.append({'signer': 'no data', 'sig': 'available'})
                 return json.dumps(data)
