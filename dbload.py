@@ -99,8 +99,8 @@ def add_row(table, row_data):
 def process_tx(tx, blk_height):
     jsn_decode = json.dumps(tx)
     rawtx = jsonrpc("getrawtransaction", tx['txid'])
-    ret = query_noreturn('INSERT INTO tx_raw (tx_hash,raw,decoded,height) VALUES(%s,%s,%s,%s)', tx['txid'], rawtx['Data'],
-                         jsn_decode, blk_height)
+    ret = query_noreturn('INSERT INTO tx_raw (tx_hash,raw,decoded,height,size) VALUES(%s,%s,%s,%s,%s)', tx['txid'], rawtx['Data'],
+                         jsn_decode, blk_height, tx['size'])
     total_out = Decimal(0)
     # Transaction addresses are stored in tx_address to determine duplicate addresses in tx_in / tx_out.
     # If a duplicate address is found, the tx count for address will only be incremented once.
@@ -117,11 +117,13 @@ def process_tx(tx, blk_height):
         key['raw'] = rawtx['Data']
         key['value'] = Decimal(key['value']).quantize(Decimal('1.00000000')).normalize()
 
-        if hasAddresses:
-            add_row('tx_out', key)
-            accounting(key['address'], key['value'], True, 'add')
+        add_row('tx_out', key)
 
-        conn.commit()
+        if hasAddresses:
+            # commit performed inside of accounting()
+            accounting(key['address'], key['value'], True, 'add')
+        else:
+            conn.commit()
         total_out = Decimal(total_out + key['value'])
     # If the transaction total out is larger then the lowest entry on the large tx table,
     # replace the lowest transaction with this transaction

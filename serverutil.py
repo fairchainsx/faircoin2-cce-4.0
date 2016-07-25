@@ -286,7 +286,7 @@ def get_transaction(transaction):
         txout = query_multi('SELECT * FROM tx_out WHERE tx_hash = %s', transaction)
         if txin is None or txout is None:
             return {'Status': 'error', 'Data': 'Transaction not found'}
-        blk = query_single('SELECT * FROM block WHERE height = %s', txout[0][6])
+        blk = query_single('SELECT b.*,r.size FROM block b LEFT JOIN tx_raw r on r.height = b.height and r.tx_hash = %s WHERE b.height = %s', transaction, txout[0][6])
         return {'Status': 'ok', 'blk': blk, 'txin': txin, 'txout': txout}
     except Exception as e:
         print >> sys.stderr, e, 'Transactions'

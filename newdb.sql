@@ -367,6 +367,7 @@ CREATE TABLE `tx_raw` (
   `raw` mediumtext COLLATE utf8_bin,
   `decoded` mediumtext COLLATE utf8_bin NOT NULL,
   `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `size` mediumint(9) NOT NULL DEFAULT '0',
   UNIQUE KEY `tx_hash` (`tx_hash`),
   KEY `height` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
