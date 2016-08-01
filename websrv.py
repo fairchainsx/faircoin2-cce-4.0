@@ -47,7 +47,7 @@ class explorer:
     @cherrypy.expose
     def index(self, **args):
         try:
-            ret = homepage()
+            num, height, ret = homepage(args.get('num', 10), args.get('height', None))
             stats = ret.get('stats', None)
             topblocks = ret.get('topblocks', None)
             template = templateEnv.get_template('index.html')
@@ -56,6 +56,9 @@ class explorer:
                 'topblocks': topblocks,
                 'name': CONFIG['chain']['name'],
                 'ratelabel': CONFIG['stat']['ratelabel'],
+                'numberOfBlocks': num,
+                'nextPage': height + num,
+                'prevPage': height - num
             }
             return template.render(templateVars)
         except Exception as e:

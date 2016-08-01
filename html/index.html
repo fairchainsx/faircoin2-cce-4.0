@@ -5,15 +5,12 @@
 {% block content %}
 <br />
 <div class="jumbotron">
-    &nbsp;&nbsp;
     <form method="get" action="/search" autocomplete="off" form style="display:inline">
     <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
     <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
-
-            <h3>&nbsp;
-    Total coin-supply: <font style="color:maroon;">{{ stats[0] | normalize }}</font>
-    </h3>
- </div>
+    <h3>Total coin-supply: <span style="color:maroon;">{{ stats[0] | normalize }}</span></h3>
+    <a href="?height={{ prevPage }}&num={{ numberOfBlocks }}">Back</a> - <a href="?height={{ nextPage }}&num={{numberOfBlocks}}">Next</a>
+</div>
 <div class="container-fluid table-responsive">
      <table class="table table-condensed table-striped table-hover">
         <thead>
