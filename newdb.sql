@@ -69,9 +69,24 @@ CREATE TABLE `block` (
   `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
   `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
-  `raw` text COLLATE utf8_bin,
   PRIMARY KEY (`height`),
   KEY `hash` (`hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `chainAdmin`
+--
+
+DROP TABLE IF EXISTS `chainAdmin`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chainAdmin` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `adminId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  `heightAdded` mediumint(9) NOT NULL DEFAULT '-1',
+  `pubKey` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`height`,`adminId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -178,7 +193,6 @@ CREATE TABLE `orph_block` (
   `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
   `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
-  `raw` text COLLATE utf8_bin,
   KEY `hash` (`hash`),
   KEY `height` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -334,6 +348,15 @@ CREATE TABLE `tx_in` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
+CREATE TABLE `tx` (
+  `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  `version` int(4) NOT NULL DEFAULT '0',
+  `size` int(4) NOT NULL DEFAULT '0',
+  `locktime` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY `tx_hash` (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
 --
 -- Table structure for table `tx_out`
 --
@@ -352,24 +375,6 @@ CREATE TABLE `tx_out` (
   KEY `address` (`address`),
   KEY `height` (`height`),
   KEY `tx_hash` (`tx_hash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `tx_raw`
---
-
-DROP TABLE IF EXISTS `tx_raw`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tx_raw` (
-  `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `raw` mediumtext COLLATE utf8_bin,
-  `decoded` mediumtext COLLATE utf8_bin NOT NULL,
-  `height` mediumint(9) NOT NULL DEFAULT '-1',
-  `size` mediumint(9) NOT NULL DEFAULT '0',
-  UNIQUE KEY `tx_hash` (`tx_hash`),
-  KEY `height` (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

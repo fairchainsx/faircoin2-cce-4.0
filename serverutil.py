@@ -164,6 +164,26 @@ def homepage(num, height):
         print >> sys.stderr, e, 'Homepage'
         return {'Status': 'error', 'Data': 'Unknown error'}
 
+def get_blocks(block_type):
+    try:
+        if block_type is None:
+            block_type = 0
+
+        payload = "cvninfo"
+        if block_type == 'params':
+            payload = "params"
+        elif block_type == 'admins':
+            payload = "admins"
+
+        blocks = query_multi('SELECT b.*,a.alias FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator WHERE b.payload LIKE %s ORDER BY height DESC', ('%' + payload + '%'))
+
+        return {'Status': 'ok', 'blocks': blocks}, payload
+    except Exception as e:
+        print >> sys.stderr, e, 'get_blocks'
+        return {'Status': 'error', 'Data': 'Unknown error'}
+
+
+
 # Regular expression:  re.sub(r'[^a-zA-Z0-9]', '', <input string>)
 # The expression is used to filter out all but alpha-numeric charcters from user input.
 # This serves a security function and cuts spaces which can causes searches to fail.
@@ -223,13 +243,12 @@ def get_block(block):
         else:
             block = str(re.sub(r'[^a-zA-Z0-9]', '', block))
             blk = query_single('SELECT * FROM block WHERE hash = %s', block)
+
         if blk is None:
             raise Exception('Block not found')
-        # Genesis block transaction parsing is skipped
-        if blk[0] == 0:
-            return {'Status': 'ok', 'blk': blk, 'transactions': None}
 
         creatorAlias = query_single('SELECT alias FROM cvnalias WHERE nodeId = %s', blk[3])
+
         # The return dict is global to simplify the two function nature of the block page display generation.
         global transactions
         transactions = OrderedDict()
@@ -272,6 +291,13 @@ def get_block(block):
             for row in cvnrows:
                 cvns.append({'nodeId': row[0], 'heightAdded': row[1], 'pubKey': row[2] , 'alias': row[3]})
 
+        chainAdmins = []
+
+        chainAdminrows = query_multi('SELECT c.adminId, c.heightAdded, c.pubKey, a.alias FROM chainAdmin c LEFT JOIN cvnalias a on a.nodeId = c.adminId WHERE c.height = %s ORDER BY c.heightAdded', blk[0])
+        if chainAdminrows:
+            for row in chainAdminrows:
+                chainAdmins.append({'adminId': row[0], 'heightAdded': row[1], 'pubKey': row[2] , 'alias': row[3]})
+
         chainParameter = {}
         params = query_single('SELECT version,minAdminSigs,maxAdminSigs,blockSpacing,blockSpacingGracePeriod,transactionFee,dustThreshold,minSuccessiveSignatures FROM chainParameter WHERE height = %s', blk[0])
 
@@ -285,7 +311,7 @@ def get_block(block):
             chainParameter['dustThreshold'] = params[6]
             chainParameter['minSuccessiveSignatures'] = params[7]
 
-        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff), 'creatorAlias': creatorAlias}
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
     except Exception as e:
         print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}
@@ -296,10 +322,11 @@ def get_transaction(transaction):
         transaction = str(re.sub(r'[^a-zA-Z0-9]', '', transaction))
         txin = query_multi('SELECT * FROM tx_in WHERE tx_hash = %s', transaction)
         txout = query_multi('SELECT * FROM tx_out WHERE tx_hash = %s', transaction)
-        if txin is None or txout is None:
+        tx = query_single('SELECT * FROM tx WHERE tx_hash = %s', transaction)
+        if txin is None or txout is None or tx is None:
             return {'Status': 'error', 'Data': 'Transaction not found'}
-        blk = query_single('SELECT b.*,r.size FROM block b LEFT JOIN tx_raw r on r.height = b.height and r.tx_hash = %s WHERE b.height = %s', transaction, txout[0][6])
-        return {'Status': 'ok', 'blk': blk, 'txin': txin, 'txout': txout}
+        blk = query_single('SELECT b.*, 0 as size FROM block b WHERE b.height = %s', txout[0][6])
+        return {'Status': 'ok', 'blk': blk, 'txin': txin, 'txout': txout, 'tx': tx}
     except Exception as e:
         print >> sys.stderr, e, 'Transactions'
         return {'Status': 'error', 'Data': 'Unknown error'}

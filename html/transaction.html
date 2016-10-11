@@ -9,15 +9,15 @@
     <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
 
     <br />
-    <h2>Transaction: <font style="color:maroon;"> {{ transaction.txout[0][0] }}</font></h2>
+    <h2>Transaction: <font style="color:maroon;"> {{ transaction.tx[0] }}</font></h2>
     </div>
 
 <div class="container-fluid">
-
     Block Height: <a href="/block?block={{ transaction.blk[0] }}">{{ transaction.blk[0] }}</a><br>
-    TX Hash: {{ transaction.txout[0][0] }}<br>
-    Time: {{ transaction.blk[2] }} ({{transaction.blk[2] | format_time }})<br>
-    Size: {{ transaction.blk[15] }}<br>
+    TX Hash: {{ transaction.tx[0] }}<br>
+    Version: {{ transaction.tx[1] }}<br>
+    Locktime: {{ transaction.tx[3] }} ({{transaction.tx[3] | format_time }})<br>
+    Size: {{ transaction.tx[2] }}<br>
     Number of Inputs: {{transaction.txin | length }}<br>
     Number of Outputs: {{ transaction.txout | length}}<br>
 </div>

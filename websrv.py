@@ -140,6 +140,21 @@ class explorer:
             raise cherrypy.HTTPError(503)
 
     @cherrypy.expose
+    def blocks(self, **args):
+        try:
+            blocks, payload = get_blocks(args.get('block_type', 0))
+            template = templateEnv.get_template('blocks.html')
+            templateVars = {
+                    'blocks': blocks,
+                    'name': CONFIG['chain']['name'],
+                    'payload': payload
+                        }
+            return template.render(templateVars)
+        except Exception as e:
+            print >> sys.stderr, e , 'Blocks page'
+            raise cherrypy.HTTPError(503)
+
+    @cherrypy.expose
     def transaction(self, **args):
         try:
             transaction = get_transaction(args['transaction'])

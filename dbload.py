@@ -98,12 +98,13 @@ def add_row(table, row_data):
 # Parse Transaction
 def process_tx(tx, blk_height):
     jsn_decode = json.dumps(tx)
-    rawtx = jsonrpc("getrawtransaction", tx['txid'])
-    ret = query_noreturn('INSERT INTO tx_raw (tx_hash,raw,decoded,height,size) VALUES(%s,%s,%s,%s,%s)', tx['txid'], rawtx['Data'],
-                         jsn_decode, blk_height, tx['size'])
     total_out = Decimal(0)
     # Transaction addresses are stored in tx_address to determine duplicate addresses in tx_in / tx_out.
     # If a duplicate address is found, the tx count for address will only be incremented once.
+
+    tx['tx_hash'] = tx['txid']
+    add_row('tx', tx)
+
     tx_address = []
     for key in tx['vout']:
         hasAddresses = True if 'addresses' in key['scriptPubKey'] else False
@@ -114,7 +115,6 @@ def process_tx(tx, blk_height):
         key['type'] = key['scriptPubKey']['type']
         key['height'] = blk_height
         key['tx_hash'] = tx['txid']
-        key['raw'] = rawtx['Data']
         key['value'] = Decimal(key['value']).quantize(Decimal('1.00000000')).normalize()
 
         add_row('tx_out', key)
@@ -170,7 +170,7 @@ def process_block(blk_height):
             if prostx['Status'] == 'error':
                 raise Exception(prostx['Data'])
             total_sent = Decimal(total_sent + prostx['Data']['out'])
-        block['raw'] = json.dumps(block, sort_keys=False, indent=1)
+
         add_row('block', block)
 
         for sig in block['signatures']:
@@ -182,6 +182,10 @@ def process_block(blk_height):
         for cvn in block['cvnInfo']:
             cvn['height'] = blk_height
             add_row('cvn', cvn)
+
+        for admin in block['chainAdmins']:
+            admin['height'] = blk_height
+            add_row('chainAdmin', admin)
 
         if block['chainParameters']:
             cp = block['chainParameters']
@@ -294,18 +298,13 @@ def main(argv):
                         orphan(blk)
 
 
-            # Genesis block TX needs to be entered manually. Process block information only
             if startmode == 'newdb':
-                b_hash = jsonrpc("getblockhash", 0)['Data']
-                block = jsonrpc("getblock", b_hash, 4)['Data']
-                block['raw'] = json.dumps(block, sort_keys=False, indent=1)
-                add_row('block', block)
                 # Set up top_address table
                 for i in range(int(CONFIG['stat']['richlistlen'])):
                     ret = query_noreturn('INSERT INTO top_address (rank) VALUES(%s)', i + 1)
                 # Set up stats table
                 ret = query_noreturn('INSERT INTO stats (peer_txt) VALUES("None")')
-                blk_height = 1
+                blk_height = 0
 
             # Process blocks loop
             while blk_height <= top_height:
@@ -314,7 +313,7 @@ def main(argv):
                     raise Exception(ret['Data'])
                 if startmode == 'newdb' and blk_height == 101:
                     ret = query_noreturn('TRUNCATE large_tx')
-                    time.sleep(5)
+                    time.sleep(1)
                     ret = query_noreturn('INSERT INTO large_tx SELECT tx_hash,SUM(value) FROM tx_out GROUP BY tx_hash ORDER BY SUM(value) DESC LIMIT 100')
                 blk_height += 1
                 if verbose:

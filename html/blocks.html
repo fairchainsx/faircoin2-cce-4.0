@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+<br />
+<div class="jumbotron">
+    <form method="get" action="/search" autocomplete="off" form style="display:inline">
+    <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
+    <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
+    <h3>Payload type: <span style="color:maroon;">{{ payload }}</span></h3>
+</div>
+<div class="container-fluid table-responsive">
+     <table class="table table-condensed table-striped table-hover">
+        <thead>
+            <th>Height</th>
+            <th>Age</th>
+            <th>Transactions</th>
+            <th>Payload</th>
+            <th>CVN Signatures</th>
+            <th>Total Sent</th>
+            <th>Creator ID</th>
+            <th>Size</th>
+        </thead>
+     <tbody>
+     {% for row in blocks.blocks %}
+     <tr>
+	<td><a href="block?block={{ row[0] }}">{{ row[0] }}</a></td><td>{{ row[2] | format_time }}<div style="font-size:9px">{{ row[2] | time_passed }}</div></td>
+		<td>{{ row[12] }}</td><td>{{ row[6] }}</td><td>{{ row[4] }}</td><td>{{ row[13] | normalize }}</td><td>{% if row[15] %} <strong>{{ row[15] }}</strong> <small>({{ row[3] }})</small>{% else%}{{ row[3] }}{%endif%}</td><td>{{ row[8] }}</td></tr>
+	{% endfor %}
+         </tbody>
+
+    </table>
+</div>
+
+{% endblock %}

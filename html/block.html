@@ -87,6 +87,28 @@
     </table>
 </div>
 {% endif %}
+{% if block.chainAdmins %}
+<div class="container-fluid">
+<br /> <h2>Chain Admins payload</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Admin ID</th>
+            <th>Height added</th>
+            <th>Public key</th>
+        </thead>
+     <tbody>
+
+    {% for a in block.chainAdmins %}
+    <tr>
+       <td>{% if a['alias'] %}<strong>{{ a['alias'] }}</strong><br/><small>{{ a['adminId'] }}</small>{% else %}{{ a['adminId'] }}{%endif%}</td>
+       <td>{{ a['heightAdded'] }}</td>
+       <td>{{ a['pubKey'] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endif %}
 {% if block['chainParameter'] %}
 <div class="container-fluid">
 <br /> <h2>Chain parameter payload</h2><br />
