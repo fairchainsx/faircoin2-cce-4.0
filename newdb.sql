@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.49, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.54, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: cce
 -- ------------------------------------------------------
--- Server version	5.5.49-0ubuntu0.14.04.1
+-- Server version	5.5.54-0ubuntu0.14.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -32,17 +32,15 @@ CREATE TABLE `address` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `adminSignatures`
+-- Table structure for table `adminSignerIds`
 --
 
-DROP TABLE IF EXISTS `adminSignatures`;
+DROP TABLE IF EXISTS `adminSignerIds`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `adminSignatures` (
+CREATE TABLE `adminSignerIds` (
   `height` mediumint(9) NOT NULL DEFAULT '-1',
-  `version` mediumint(9) NOT NULL DEFAULT '0',
   `adminId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
-  `signature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`height`,`adminId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -62,7 +60,9 @@ CREATE TABLE `block` (
   `nSignatures` mediumint(9) NOT NULL DEFAULT '0',
   `nAdminSignatures` mediumint(9) NOT NULL DEFAULT '0',
   `payload` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '',
-  `creatorSignature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `chainSignature` varchar(128) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `creatorSignature` varchar(128) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `adminMultiSig` varchar(128) COLLATE utf8_bin NOT NULL DEFAULT '',
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
@@ -70,7 +70,8 @@ CREATE TABLE `block` (
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
   `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   PRIMARY KEY (`height`),
-  KEY `hash` (`hash`)
+  KEY `hash` (`hash`),
+  KEY `creator` (`creator`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -107,6 +108,9 @@ CREATE TABLE `chainParameter` (
   `transactionFee` int(16) NOT NULL DEFAULT '0',
   `dustThreshold` int(16) NOT NULL DEFAULT '0',
   `minSuccessiveSignatures` mediumint(9) NOT NULL DEFAULT '0',
+  `blocksToConsiderForSigCheck` mediumint(9) NOT NULL DEFAULT '0',
+  `percentageOfSignaturesMean` mediumint(9) NOT NULL DEFAULT '0',
+  `maxBlockSize` mediumint(9) NOT NULL DEFAULT '0',
   PRIMARY KEY (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -172,6 +176,20 @@ CREATE TABLE `large_tx` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `missingCreatorIds`
+--
+
+DROP TABLE IF EXISTS `missingCreatorIds`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `missingCreatorIds` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
+  PRIMARY KEY (`height`,`nodeId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `orph_block`
 --
 
@@ -186,15 +204,18 @@ CREATE TABLE `orph_block` (
   `nSignatures` mediumint(9) NOT NULL DEFAULT '0',
   `nAdminSignatures` mediumint(9) NOT NULL DEFAULT '0',
   `payload` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '',
-  `creatorSignature` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `chainSignature` varchar(128) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `creatorSignature` varchar(128) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `adminMultiSig` varchar(128) COLLATE utf8_bin NOT NULL DEFAULT '',
   `size` mediumint(9) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   `n_tx` tinyint(4) NOT NULL DEFAULT '0',
   `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
+  PRIMARY KEY (`height`),
   KEY `hash` (`hash`),
-  KEY `height` (`height`)
+  KEY `creator` (`creator`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -326,6 +347,22 @@ CREATE TABLE `top_address` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `tx`
+--
+
+DROP TABLE IF EXISTS `tx`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx` (
+  `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  `version` int(4) NOT NULL DEFAULT '0',
+  `size` int(4) NOT NULL DEFAULT '0',
+  `locktime` int(10) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`tx_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `tx_in`
 --
 
@@ -347,15 +384,6 @@ CREATE TABLE `tx_in` (
   KEY `tx_hash` (`tx_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
-CREATE TABLE `tx` (
-  `tx_hash` varchar(65) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `version` int(4) NOT NULL DEFAULT '0',
-  `size` int(4) NOT NULL DEFAULT '0',
-  `locktime` int(10) NOT NULL DEFAULT '0',
-  PRIMARY KEY `tx_hash` (`tx_hash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
 
 --
 -- Table structure for table `tx_out`
@@ -387,4 +415,4 @@ CREATE TABLE `tx_out` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-07-01 16:11:07
+-- Dump completed on 2017-01-28 16:47:04

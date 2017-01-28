@@ -173,11 +173,11 @@ def process_block(blk_height):
 
         add_row('block', block)
 
-        for sig in block['signatures']:
-            ret = query_noreturn('INSERT INTO signatures (height,version,signerId,signature) VALUES(%s,%s,%s,%s)', blk_height, sig['version'], sig['signerId'], sig['signature'])
+        for nodeId in block['missingCreatorIds']:
+            ret = query_noreturn('INSERT INTO missingCreatorIds (height,nodeId) VALUES(%s,%s)', blk_height, nodeId)
 
-        for sig in block['adminSignatures']:
-            ret = query_noreturn('INSERT INTO adminSignatures (height,version,adminId,signature) VALUES(%s,%s,%s,%s)', blk_height, sig['version'], sig['adminId'], sig['signature'])
+        for adminId in block['adminSignerIds']:
+            ret = query_noreturn('INSERT INTO adminSignerIds (height,adminId) VALUES(%s,%s)', blk_height, adminId)
 
         for cvn in block['cvnInfo']:
             cvn['height'] = blk_height

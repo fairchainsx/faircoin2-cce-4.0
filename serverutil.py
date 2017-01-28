@@ -299,7 +299,7 @@ def get_block(block):
                 chainAdmins.append({'adminId': row[0], 'heightAdded': row[1], 'pubKey': row[2] , 'alias': row[3]})
 
         chainParameter = {}
-        params = query_single('SELECT version,minAdminSigs,maxAdminSigs,blockSpacing,blockSpacingGracePeriod,transactionFee,dustThreshold,minSuccessiveSignatures FROM chainParameter WHERE height = %s', blk[0])
+        params = query_single('SELECT version,minAdminSigs,maxAdminSigs,blockSpacing,blockSpacingGracePeriod,transactionFee,dustThreshold,minSuccessiveSignatures,blocksToConsiderForSigCheck,percentageOfSignaturesMean,maxBlockSize FROM chainParameter WHERE height = %s', blk[0])
 
         if params:
             chainParameter['version'] = params[0]
@@ -310,8 +310,11 @@ def get_block(block):
             chainParameter['transactionFee'] = params[5]
             chainParameter['dustThreshold'] = params[6]
             chainParameter['minSuccessiveSignatures'] = params[7]
+            chainParameter['blocksToConsiderForSigCheck'] = params[8]
+            chainParameter['percentageOfSignaturesMean'] = params[9]
+            chainParameter['maxBlockSize'] = params[10]
 
-        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[9] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[11] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
     except Exception as e:
         print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}

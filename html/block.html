@@ -24,14 +24,14 @@
     Hash: {{ block.blk[1] }} <br>
     Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br>
     Creator ID: {% if block.creatorAlias %} <strong>{{ block.creatorAlias[0] }}</strong> <small>({{ block.blk[3] }})</small>{% else%}{{ block.blk[3] }}{%endif%}<br>
-    Creator Signature: {{ block.blk[7] }}<br>
-    Signatures: {{ block.blk[4] }}{% if block.blk[4] %} (<a class="showSigs" href="#">Show</a>)<ul id="sigs"></ul>{%else%}<br/>{%endif%}
-    Admin signatures: {{ block.blk[5] }}{% if block.blk[5] %} (<a class="showAdmSigs" href="#">Show</a>)<ul id="admSigs"></ul>{%else%}<br/>{%endif%}
+    Chain Signature: {{ block.blk[7] }} ({{ block.blk[4] }}) <br>
+{% if block.blk[5] %}    Admin Signature: {{ block.blk[9] }} ({{ block.blk[5] }}) <br>
+{%endif%}    Creator Signature: {{ block.blk[8] }}<br>
     Payload: {{ block.blk[6] }}<br>
-    Transactions: {{ block.blk[12] }} <br>
-    Total Sent: {{ block.blk[13] | normalize }} <br>
-    Size: {{ block.blk[8] }} kilobytes<br>
-    Merkle Root: {{ block.blk[10] }} <br>
+    Transactions: {{ block.blk[14] }} <br>
+    Total Sent: {{ block.blk[15] | normalize }} <br>
+    Size: {{ block.blk[10] }} kilobytes<br>
+    Merkle Root: {{ block.blk[12] }} <br>
     Version: {{ block.realVersion }} <br>
 
 </div>
@@ -127,6 +127,9 @@
     <tr><td>Transaction fee</td><td>{{ block['chainParameter']['transactionFee'] / 100000000 | normalize }} FAIR</td></tr>
     <tr><td>Dust threshold</td><td>{{ block['chainParameter']['dustThreshold'] / 100000000 | normalize }} FAIR</td></tr>
     <tr><td>Minimum successive signatures</td><td>{{ block['chainParameter']['minSuccessiveSignatures'] }}</td></tr>
+    <tr><td>Blocks to consider for signature check</td><td>{{ block['chainParameter']['blocksToConsiderForSigCheck'] }}</td></tr>
+    <tr><td>Percentage of signatures mean</td><td>{{ block['chainParameter']['percentageOfSignaturesMean'] }}</td></tr>
+    <tr><td>Maximum block size</td><td>{{ block['chainParameter']['maxBlockSize'] }}</td></tr>
     </tbody>
     </table>
 </div>
@@ -136,95 +139,6 @@
 
 
 {% endif %}
-<script>
-$('a.showSigs').click(function(event) {
-    event.preventDefault();
 
-    if ($('a.showSigs').text() == 'Hide') {
-        $('a.showSigs').text('Show');
-        $('#sigs').html('');
-        $('a.showSigs').blur();
-        return;
-    }
-
-    $.ajax({
-        url: '../api/getsigs?block={{block.blk[0]}}&adm=False',
-        data: {
-            format: 'json'
-        },
-        error: function() {
-            $('#sigs').html('<p>An error has occurred</p>');
-        },
-        dataType: 'json',
-        success: function(data) {
-            var cnt = 0;
-            $.each(data, function(index, sig) {
-                var line = $("<li" + (cnt++ % 2 ? "" : " class='odd'") + ">");
-
-                if (sig.alias) {
-                    var signerDiv = $('<div>');
-                    signerDiv.append($('<strong>').text(sig.alias));
-                    signerDiv.append($('<small>').text('(' + sig.signer + ')'));
-                    line.append(signerDiv);
-                }  else {
-                    var signerDiv = $('<div>');
-                    signerDiv.append($('<strong>').text(sig.signer));
-                    line.append(signerDiv);
-                }
-                line.append($('<span>').text(sig.sig));
-                line.append('<br clear="all"/>');
-                $('#sigs').append(line);
-                $('a.showSigs').text('Hide');
-                $('a.showSigs').blur();
-            })
-        },
-        type: 'GET'
-    });
-});
-$('a.showAdmSigs').click(function(event) {
-    event.preventDefault();
-
-    if ($('a.showAdmSigs').text() == 'Hide') {
-        $('a.showAdmSigs').text('Show');
-        $('#admSigs').html('');
-        $('a.showAdmSigs').blur();
-        return;
-    }
-
-    $.ajax({
-        url: '../api/getsigs?block={{block.blk[0]}}&adm=True',
-        data: {
-            format: 'json'
-        },
-        error: function() {
-            $('#admSigs').html('<p>An error has occurred</p>');
-        },
-        dataType: 'json',
-        success: function(data) {
-            var cnt = 0;
-            $.each(data, function(index, sig) {
-                var line = $("<li" + (cnt++ % 2 ? "" : " class='odd'") + ">");
-
-                if (sig.alias) {
-                    var signerDiv = $('<div>');
-                    signerDiv.append($('<strong>').text(sig.alias));
-                    signerDiv.append($('<small>').text('(' + sig.signer + ')'));
-                    line.append(signerDiv);
-                }  else {
-                    var signerDiv = $('<div>');
-                    signerDiv.append($('<strong>').text(sig.signer));
-                    line.append(signerDiv);
-                }
-                line.append($('<span>').text(sig.sig));
-                line.append('<br clear="all"/>');
-                $('#admSigs').append(line);
-                $('a.showAdmSigs').text('Hide');
-                $('a.showAdmSigs').blur();
-            })
-        },
-        type: 'GET'
-    });
-});
-</script>
 {% endblock %}
 
