@@ -153,11 +153,14 @@ def homepage(num, height):
                 num = 100
 
         stats = query_single('SELECT * FROM stats')
+        base_query = """select b.*,a.alias, GROUP_CONCAT(m.nodeId) missing from block b 
+            LEFT JOIN cvnalias a on a.nodeId = b.creator 
+            LEFT JOIN missingCreatorIds m on m.height = b.height """
         if height is None:
-            topblocks = query_multi('SELECT b.*,a.alias FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator ORDER BY height DESC LIMIT %s', num)
+            topblocks = query_multi(base_query + 'GROUP BY b.height ORDER BY height DESC LIMIT %s', num)
             height = topblocks[0][0];
         else:
-            topblocks = query_multi('SELECT b.*,a.alias FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator WHERE b.height <= %s ORDER BY height DESC LIMIT %s', height, num)
+            topblocks = query_multi(base_query + 'WHERE b.height <= %s GROUP BY b.height ORDER BY height DESC LIMIT %s', height, num)
 
         return num, int(height), {'Status': 'ok', 'stats': stats, 'topblocks': topblocks}
     except Exception as e:
@@ -175,7 +178,7 @@ def get_blocks(block_type):
         elif block_type == 'admins':
             payload = "admins"
 
-        blocks = query_multi('SELECT b.*,a.alias FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator WHERE b.payload LIKE %s ORDER BY height DESC', ('%' + payload + '%'))
+        blocks = query_multi('SELECT b.*,a.alias, count(m.height) n FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator LEFT JOIN missingCreatorIds m on m.height = b.height WHERE b.payload LIKE %s GROUP BY b.height ORDER BY height DESC', ('%' + payload + '%'))
 
         return {'Status': 'ok', 'blocks': blocks}, payload
     except Exception as e:
@@ -237,12 +240,12 @@ def get_coinbase(height):
 def get_block(block):
     try:
         if block == '-1':
-            blk = query_single('SELECT * FROM block ORDER BY height DESC LIMIT 1')
+            blk = query_single('SELECT b.*,GROUP_CONCAT(m.nodeId) missing, count(m.height) n FROM block b LEFT JOIN missingCreatorIds m on m.height = b.height ORDER BY b.height DESC LIMIT 1')
         elif str(block).isdigit():
-            blk = query_single('SELECT * FROM block WHERE height = %s', block)
+            blk = query_single('SELECT b.*,GROUP_CONCAT(m.nodeId) missing, count(m.height) n FROM block b LEFT JOIN missingCreatorIds m on m.height = b.height WHERE b.height = %s', block)
         else:
             block = str(re.sub(r'[^a-zA-Z0-9]', '', block))
-            blk = query_single('SELECT * FROM block WHERE hash = %s', block)
+            blk = query_single('SELECT b.*,GROUP_CONCAT(m.nodeId) missing, count(m.height) n FROM block b LEFT JOIN missingCreatorIds m on m.height = b.height WHERE b.hash = %s', block)
 
         if blk is None:
             raise Exception('Block not found')

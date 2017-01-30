@@ -27,6 +27,7 @@
     Chain Signature: {{ block.blk[7] }} ({{ block.blk[4] }}) <br>
 {% if block.blk[5] %}    Admin Signature: {{ block.blk[9] }} ({{ block.blk[5] }}) <br>
 {%endif%}    Creator Signature: {{ block.blk[8] }}<br>
+    Missing signers({{block.blk[17]}}): {{ block.blk[16] }}<br>
     Payload: {{ block.blk[6] }}<br>
     Transactions: {{ block.blk[14] }} <br>
     Total Sent: {{ block.blk[15] | normalize }} <br>
