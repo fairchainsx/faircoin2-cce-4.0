@@ -172,13 +172,19 @@ def get_blocks(block_type):
         if block_type is None:
             block_type = 0
 
+        blocks = {}
+
         payload = "cvninfo"
         if block_type == 'params':
             payload = "params"
         elif block_type == 'admins':
             payload = "admins"
 
-        blocks = query_multi('SELECT b.*,a.alias, count(m.height) n FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator LEFT JOIN missingCreatorIds m on m.height = b.height WHERE b.payload LIKE %s GROUP BY b.height ORDER BY height DESC', ('%' + payload + '%'))
+        if block_type == 'missing':
+            payload = "Last 50 blocks with missing signers"
+            blocks = query_multi('SELECT b.*,a.alias, GROUP_CONCAT(m.nodeId) missing FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator LEFT JOIN missingCreatorIds m on m.height = b.height WHERE m.nodeId is not NULL GROUP BY b.height ORDER BY height DESC LIMIT 50')
+        else:
+            blocks = query_multi('SELECT b.*,a.alias, GROUP_CONCAT(m.nodeId) missing FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator LEFT JOIN missingCreatorIds m on m.height = b.height WHERE b.payload LIKE %s GROUP BY b.height ORDER BY height DESC', ('%' + payload + '%'))
 
         return {'Status': 'ok', 'blocks': blocks}, payload
     except Exception as e:
