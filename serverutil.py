@@ -153,9 +153,10 @@ def homepage(num, height):
                 num = 100
 
         stats = query_single('SELECT * FROM stats')
-        base_query = """select b.*,a.alias, GROUP_CONCAT(m.nodeId) missing from block b 
+        base_query = """select b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing from block b 
             LEFT JOIN cvnalias a on a.nodeId = b.creator 
-            LEFT JOIN missingCreatorIds m on m.height = b.height """
+            LEFT JOIN missingCreatorIds m on m.height = b.height 
+            LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId """
         if height is None:
             topblocks = query_multi(base_query + 'GROUP BY b.height ORDER BY height DESC LIMIT %s', num)
             height = topblocks[0][0];
@@ -180,11 +181,21 @@ def get_blocks(block_type):
         elif block_type == 'admins':
             payload = "admins"
 
+        # select b.*, GROUP_CONCAT(a.alias,' (',m.nodeId,')') missing from block b left join missingCreatorIds m on m.height = b.height
+        #      left join cvnalias a on a.nodeId = m.nodeId where m.nodeId is not NULL group by b.height;
         if block_type == 'missing':
             payload = "Last 50 blocks with missing signers"
-            blocks = query_multi('SELECT b.*,a.alias, GROUP_CONCAT(m.nodeId) missing FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator LEFT JOIN missingCreatorIds m on m.height = b.height WHERE m.nodeId is not NULL GROUP BY b.height ORDER BY height DESC LIMIT 50')
+            blocks = query_multi("""SELECT b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing FROM block b 
+                LEFT JOIN cvnalias a on a.nodeId = b.creator 
+                LEFT JOIN missingCreatorIds m on m.height = b.height 
+                LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId 
+                WHERE m.nodeId is not NULL GROUP BY b.height ORDER BY height DESC LIMIT 50""")
         else:
-            blocks = query_multi('SELECT b.*,a.alias, GROUP_CONCAT(m.nodeId) missing FROM block b LEFT JOIN cvnalias a on a.nodeId = b.creator LEFT JOIN missingCreatorIds m on m.height = b.height WHERE b.payload LIKE %s GROUP BY b.height ORDER BY height DESC', ('%' + payload + '%'))
+            blocks = query_multi(("""SELECT b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing FROM block b 
+                LEFT JOIN cvnalias a on a.nodeId = b.creator 
+                LEFT JOIN missingCreatorIds m on m.height = b.height 
+                LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId 
+                WHERE b.payload LIKE %s GROUP BY b.height ORDER BY height DESC"""), ('%' + payload + '%'))
 
         return {'Status': 'ok', 'blocks': blocks}, payload
     except Exception as e:

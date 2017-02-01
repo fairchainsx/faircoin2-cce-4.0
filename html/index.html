@@ -9,7 +9,7 @@
     <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}" title="a-z A-Z 0-9" maxlength="75" autofocus required>
     <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
     <h3>Total coin-supply: <span style="color:maroon;">{{ stats[0] | normalize }}</span></h3>
-    <a href="?height={{ prevPage }}&num={{ numberOfBlocks }}">Back</a> - <a href="?height={{ nextPage }}&num={{numberOfBlocks}}">Next</a>
+    <a href="?height={{ prevPage }}&amp;num={{ numberOfBlocks }}">Back</a> - <a href="?height={{ nextPage }}&amp;num={{numberOfBlocks}}">Next</a>
 </div>
 <div class="container-fluid table-responsive">
      <table class="table table-condensed table-striped table-hover">
@@ -18,7 +18,8 @@
             <th>Age</th>
             <th>Transactions</th>
             <th>Payload</th>
-            <th>CVN Signatures</th>
+            <th>CVN signatures</th>
+            <th>Missing signatures</th>
             <th>Total Sent</th>
             <th>Creator ID</th>
             <th>Size</th>
@@ -27,7 +28,7 @@
      {% for row in topblocks %}
      <tr>
 	<td><a href="block?block={{ row[0] }}">{{ row[0] }}</a></td><td>{{ row[2] | format_time }}<div style="font-size:9px">{{ row[2] | time_passed }}</div></td>
-		<td>{{ row[14] }}</td><td>{{ row[6] }}</td><td>{{ row[4] }}{% if row[17] %} <small>(missing: {{ row[17] }})</small>{%endif%}</td><td>{{ row[13] | normalize }}</td><td>{% if row[16] %} <strong>{{ row[16] }}</strong> <small>({{ row[3] }})</small>{% else%}{{ row[3] }}{%endif%}</td><td>{{ row[10] }}</td></tr>
+		<td>{{ row[14] }}</td><td>{{ row[6] }}</td><td>{{ row[4] }}</td><td>{%if row[17]%}{{row[17]}}{%else%}-{%endif%}</td><td>{{ row[13] | normalize }}</td><td>{% if row[16] %}<strong>{{ row[16] }}</strong> <small>({{ row[3] }})</small>{% else%}{{ row[3] }}{%endif%}</td><td>{{ row[10] }}</td></tr>
 	{% endfor %}
          </tbody>
 

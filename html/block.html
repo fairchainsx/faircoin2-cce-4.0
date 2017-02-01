@@ -9,7 +9,7 @@
     <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
 
     <br />
-    <h2>Block Height: <font style="color:maroon;"> {{ block.blk[0] }}</font></h2>
+    <h2>Block Height: <a style="color:maroon;" href="/?height={{block.blk[0]}}">{{block.blk[0]}}</a></h2>
 
 <form style="display:inline" form="" action="block" method="get">
 <button class="btn" value="{{ block.blk[0] - 1}}" name="block" type="submit">&lt;-- Prev Block</button>
