@@ -163,7 +163,7 @@ def process_block(blk_height):
         counter = 0
         total_sent = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
-        block = jsonrpc("getblock", b_hash, 5)['Data']
+        block = jsonrpc("getblock", b_hash, True, 5)['Data']
 
         for key in block['tx']:
             prostx = process_tx(key, blk_height)
