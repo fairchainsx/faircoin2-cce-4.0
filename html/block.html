@@ -125,8 +125,8 @@
     <tr><td>Maximum admin signers</td><td>{{ block['chainParameter']['maxAdminSigs'] }}</td></tr>
     <tr><td>Block spacing (sec.)</td><td>{{ block['chainParameter']['blockSpacing'] }}</td></tr>
     <tr><td>Block spacing grace period (sec.)</td><td>{{ block['chainParameter']['blockSpacingGracePeriod'] }}</td></tr>
-    <tr><td>Transaction fee</td><td>{{ block['chainParameter']['transactionFee'] / 100000000 | normalize }} FAIR</td></tr>
-    <tr><td>Dust threshold</td><td>{{ block['chainParameter']['dustThreshold'] / 100000000 | normalize }} FAIR</td></tr>
+    <tr><td>Transaction fee</td><td>{{ block['chainParameter']['transactionFee'] | normalize }} FAIR</td></tr>
+    <tr><td>Dust threshold</td><td>{{ block['chainParameter']['dustThreshold'] | normalize }} FAIR</td></tr>
     <tr><td>Minimum successive signatures</td><td>{{ block['chainParameter']['minSuccessiveSignatures'] }}</td></tr>
     <tr><td>Blocks to consider for signature check</td><td>{{ block['chainParameter']['blocksToConsiderForSigCheck'] }}</td></tr>
     <tr><td>Percentage of signatures mean</td><td>{{ block['chainParameter']['percentageOfSignaturesMean'] }}</td></tr>
