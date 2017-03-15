@@ -319,20 +319,23 @@ def get_block(block):
                 chainAdmins.append({'adminId': row[0], 'heightAdded': row[1], 'pubKey': row[2] , 'alias': row[3]})
 
         chainParameter = {}
-        params = query_single('SELECT version,minAdminSigs,maxAdminSigs,blockSpacing,blockSpacingGracePeriod,transactionFee,dustThreshold,minSuccessiveSignatures,blocksToConsiderForSigCheck,percentageOfSignaturesMean,maxBlockSize FROM chainParameter WHERE height = %s', blk[0])
+        params = query_single('SELECT * FROM chainParameter WHERE height = %s', blk[0])
 
         if params:
-            chainParameter['version'] = params[0]
-            chainParameter['minAdminSigs'] = params[1]
-            chainParameter['maxAdminSigs'] = params[2]
-            chainParameter['blockSpacing'] = params[3]
-            chainParameter['blockSpacingGracePeriod'] = params[4]
-            chainParameter['transactionFee'] = params[5]
-            chainParameter['dustThreshold'] = params[6]
-            chainParameter['minSuccessiveSignatures'] = params[7]
-            chainParameter['blocksToConsiderForSigCheck'] = params[8]
-            chainParameter['percentageOfSignaturesMean'] = params[9]
-            chainParameter['maxBlockSize'] = params[10]
+            chainParameter['version'] = params[1]
+            chainParameter['minAdminSigs'] = params[2]
+            chainParameter['maxAdminSigs'] = params[3]
+            chainParameter['blockSpacing'] = params[4]
+            chainParameter['blockSpacingGracePeriod'] = params[5]
+            chainParameter['transactionFee'] = params[6]
+            chainParameter['dustThreshold'] = params[7]
+            chainParameter['minSuccessiveSignatures'] = params[8]
+            chainParameter['blocksToConsiderForSigCheck'] = params[9]
+            chainParameter['percentageOfSignaturesMean'] = params[10]
+            chainParameter['maxBlockSize'] = params[11]
+            chainParameter['blockPropagationWaitTime'] = params[12]
+            chainParameter['retryNewSigSetInterval'] = params[13]
+            chainParameter['description'] = params[14]
 
         return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[11] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
     except Exception as e:

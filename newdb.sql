@@ -67,7 +67,7 @@ CREATE TABLE `block` (
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
-  `n_tx` tinyint(4) NOT NULL DEFAULT '0',
+  `n_tx` smallint NOT NULL DEFAULT '0',
   `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   PRIMARY KEY (`height`),
   KEY `hash` (`hash`),
@@ -111,6 +111,9 @@ CREATE TABLE `chainParameter` (
   `blocksToConsiderForSigCheck` mediumint(9) NOT NULL DEFAULT '0',
   `percentageOfSignaturesMean` mediumint(9) NOT NULL DEFAULT '0',
   `maxBlockSize` mediumint(9) NOT NULL DEFAULT '0',
+  `blockPropagationWaitTime` mediumint(9) NOT NULL DEFAULT '0',
+  `retryNewSigSetInterval` mediumint(9) NOT NULL DEFAULT '0',
+  `description` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   PRIMARY KEY (`height`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -211,7 +214,7 @@ CREATE TABLE `orph_block` (
   `version` int(11) NOT NULL DEFAULT '0',
   `merkleroot` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `total_fee` decimal(17,8) NOT NULL DEFAULT '0.00000000',
-  `n_tx` tinyint(4) NOT NULL DEFAULT '0',
+  `n_tx` smallint NOT NULL DEFAULT '0',
   `total_sent` decimal(17,8) NOT NULL DEFAULT '0.00000000',
   PRIMARY KEY (`height`),
   KEY `hash` (`hash`),
@@ -291,7 +294,7 @@ CREATE TABLE `peers` (
   `IP` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `version` int(10) NOT NULL DEFAULT '0',
   `connection` varchar(16) COLLATE utf8_bin NOT NULL DEFAULT '',
-  `sub` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '0'
+  `sub` varchar(64) COLLATE utf8_bin NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
