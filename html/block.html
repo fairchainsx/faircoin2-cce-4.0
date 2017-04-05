@@ -20,20 +20,22 @@
 
    </div>
  <div class="container-fluid">
-    Height: {{ block.blk[0] }} <br>
-    Hash: {{ block.blk[1] }} <br>
-    Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }}) <br>
+    Height: {{ block.blk[0] }}<br>
+    Hash: {{ block.blk[1] }}<br>
+    Time: {{ block.blk[2] }} ({{block.blk[2] | format_time }})<br>
     Creator ID: {% if block.creatorAlias %} <strong>{{ block.creatorAlias[0] }}</strong> <small>({{ block.blk[3] }})</small>{% else%}{{ block.blk[3] }}{%endif%}<br>
-    Chain Signature: {{ block.blk[7] }} ({{ block.blk[4] }}) <br>
-{% if block.blk[5] %}    Admin Signature: {{ block.blk[9] }} ({{ block.blk[5] }}) <br>
-{%endif%}    Creator Signature: {{ block.blk[8] }}<br>
-    Missing signers({{block.blk[17]}}): {{ block.blk[16] }}<br>
+    Chain signature: {{ block.blk[8] }} ({{ block.blk[4] }})<br>
+{% if block.blk[5] %}    Admin Signature: {{ block.blk[10] }} ({{ block.blk[5] }})<br>
+{%endif%}    Creator signature: {{ block.blk[9] }}<br>
+    Missing signers({{block.blk[18]}}): {{ block.blk[17] }}<br>
     Payload: {{ block.blk[6] }}<br>
-    Transactions: {{ block.blk[14] }} <br>
-    Total Sent: {{ block.blk[15] | normalize }} <br>
-    Size: {{ block.blk[10] }} kilobytes<br>
-    Merkle Root: {{ block.blk[12] }} <br>
-    Version: {{ block.realVersion }} <br>
+    Transactions: {{ block.blk[15] }} <br>
+    Total sent: {{ block.blk[16] | normalize }}<br>
+    Total fees: {{ block.blk[14] | normalize }}<br>
+    Size: {{ block.blk[11] }} bytes<br>
+    Merkle root: {{ block.blk[13] }}<br>
+    Payload hash: {{ block.blk[7] }}<br>
+    Version: {{ block.realVersion }}<br>
 
 </div>
 {% if block.transactions %}
@@ -41,9 +43,9 @@
 <br /> <h2> Transactions</h2><br />
      <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
         <thead>
-            <th>Transaction Hash(TXID)</th>
-            <th>Input Address : Amount</th>
-            <th>Output Address : Amount</th>
+            <th>Transaction hash(TXID)</th>
+            <th>Input address : amount</th>
+            <th>Output address : amount</th>
         </thead>
      <tbody>
 

@@ -11,11 +11,12 @@
     <h2>Currently active CVNs {{ cvns.Data | length }}</h2>
     </div>
     <div class="container-fluid table-responsive">
-     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered cvninfo">
         <thead>
+            <th>Alias</th>
             <th>CVN ID</th>
-            <th>Height added</th>
-            <th>PredictedNextBlock</th>
+            <th>Height<br/>added</th>
+            <th>Predicted<br/>next block</th>
             <th>Number of Signatures<br/>(during the last 10 blocks)</th>
             <th>Public key</th>
         </thead>
@@ -23,7 +24,8 @@
 
     {% for row in cvns.Data %}
     <tr>
-       <td>{% if row[5] %}<strong>{{ row[5] }}</strong><br/><small>{{ row[0] }}</small>{% else %}{{ row[0] }}{%endif%}</td>
+       <td>{% if row[5] %}<strong>{{ row[5] }}</strong>{% else %}-{%endif%}</td>
+       <td>{{ row[0] }}</td>
        <td>{{ row[1] }}</td>
        <td>{{ row[3] }}</td>
        <td>{{ row[4] }}</td>

@@ -20,7 +20,8 @@
             <th>Payload</th>
             <th>CVN signatures</th>
             <th>Missing signatures</th>
-            <th>Total Sent</th>
+            <th>Total sent (FAIR)</th>
+            <th>Total fee (FAIR)</th>
             <th>Creator ID</th>
             <th>Size</th>
         </thead>
@@ -28,7 +29,7 @@
      {% for row in topblocks %}
      <tr>
 	<td><a href="block?block={{ row[0] }}">{{ row[0] }}</a></td><td>{{ row[2] | format_time }}<div style="font-size:9px">{{ row[2] | time_passed }}</div></td>
-		<td>{{ row[14] }}</td><td>{{ row[6] }}</td><td>{{ row[4] }}</td><td>{%if row[17]%}{{row[17]}}{%else%}-{%endif%}</td><td>{{ row[13] | normalize }}</td><td>{% if row[16] %}<strong>{{ row[16] }}</strong> <small>({{ row[3] }})</small>{% else%}{{ row[3] }}{%endif%}</td><td>{{ row[10] }}</td></tr>
+		<td>{{ row[15] }}</td><td>{{ row[6] }}</td><td>{{ row[4] }}</td><td>{%if row[18]%}{{row[18]}}{%else%}-{%endif%}</td><td>{{ row[16] | normalize }}</td><td>{{ row[14] | normalize }}</td><td>{% if row[17] %}<strong>{{ row[17] }}</strong> <small>({{ row[3] }})</small>{% else%}{{ row[3] }}{%endif%}</td><td>{{ row[11] }}</td></tr>
 	{% endfor %}
          </tbody>
 

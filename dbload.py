@@ -99,6 +99,7 @@ def add_row(table, row_data):
 def process_tx(tx, blk_height):
     jsn_decode = json.dumps(tx)
     total_out = Decimal(0)
+    total_in = Decimal(0)
     # Transaction addresses are stored in tx_address to determine duplicate addresses in tx_in / tx_out.
     # If a duplicate address is found, the tx count for address will only be incremented once.
 
@@ -153,7 +154,9 @@ def process_tx(tx, blk_height):
         key['tx_hash'] = tx['txid']
         key['height'] = blk_height
         add_row('tx_in', key)
-    return {'Status': 'ok', 'Data': {'out': total_out}}
+        total_in = Decimal(total_in + key['value_in'])
+
+    return total_out, total_in
 
 
 # Parse block
@@ -162,14 +165,14 @@ def process_block(blk_height):
             raise Exception('Bad block height (-1)')
         counter = 0
         total_sent = Decimal(0)
+        total_fee = Decimal(0)
         b_hash = jsonrpc("getblockhash", blk_height)['Data']
         block = jsonrpc("getblock", b_hash, True, 5)['Data']
 
         for key in block['tx']:
-            prostx = process_tx(key, blk_height)
-            if prostx['Status'] == 'error':
-                raise Exception(prostx['Data'])
-            total_sent = Decimal(total_sent + prostx['Data']['out'])
+            value_out, value_in = process_tx(key, blk_height)
+            total_sent = Decimal(total_sent + value_out)
+            total_fee = Decimal(total_fee + value_in - value_out)
 
         add_row('block', block)
 
@@ -193,8 +196,8 @@ def process_block(blk_height):
             add_row('chainParameter', cp)
 
         conn.commit()
-        ret = query_noreturn('UPDATE block SET total_sent = %s, n_tx = %s WHERE height = %s',
-                             total_sent, len(block['tx']), blk_height)
+        ret = query_noreturn('UPDATE block SET total_sent = %s, total_fee = %s, n_tx = %s WHERE height = %s',
+                             total_sent, total_fee, len(block['tx']), blk_height)
         conn.commit()
         return {'Status':'ok'}
 
@@ -303,7 +306,7 @@ def main(argv):
                 for i in range(int(CONFIG['stat']['richlistlen'])):
                     ret = query_noreturn('INSERT INTO top_address (rank) VALUES(%s)', i + 1)
                 # Set up stats table
-                ret = query_noreturn('INSERT INTO stats (peer_txt) VALUES("None")')
+                ret = query_noreturn('INSERT INTO stats (peer_txt,cvn_txt) VALUES("none","none")')
                 blk_height = 0
 
             # Process blocks loop

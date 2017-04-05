@@ -337,7 +337,7 @@ def get_block(block):
             chainParameter['retryNewSigSetInterval'] = params[13]
             chainParameter['description'] = params[14]
 
-        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[11] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[12] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
     except Exception as e:
         print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}
