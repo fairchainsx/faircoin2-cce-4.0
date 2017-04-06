@@ -71,8 +71,9 @@
 {% if block.cvns %}
 <div class="container-fluid">
 <br /> <h2> CVN payload</h2><br />
-     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered cvninfo">
         <thead>
+            <th>Alias</th>
             <th>CVN ID</th>
             <th>Height added</th>
             <th>Public key</th>
@@ -81,7 +82,8 @@
 
     {% for cvn in block.cvns %}
     <tr>
-       <td>{% if cvn['alias'] %}<strong>{{ cvn['alias'] }}</strong><br/><small>{{ cvn['nodeId'] }}</small>{% else %}{{ cvn['nodeId'] }}{%endif%}</td>
+       <td>{% if cvn['alias'] %}<strong>{{ cvn['alias'] }}</strong>{% else %}-{%endif%}</td>
+       <td>{{ cvn['nodeId'] }}</td>
        <td>{{ cvn['heightAdded'] }}</td>
        <td>{{ cvn['pubKey'] }}</td>
     </tr>
@@ -93,8 +95,9 @@
 {% if block.chainAdmins %}
 <div class="container-fluid">
 <br /> <h2>Chain Admins payload</h2><br />
-     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered cvninfo">
         <thead>
+            <th>Alias</th>
             <th>Admin ID</th>
             <th>Height added</th>
             <th>Public key</th>
@@ -103,7 +106,8 @@
 
     {% for a in block.chainAdmins %}
     <tr>
-       <td>{% if a['alias'] %}<strong>{{ a['alias'] }}</strong><br/><small>{{ a['adminId'] }}</small>{% else %}{{ a['adminId'] }}{%endif%}</td>
+       <td>{% if a['alias'] %}<strong>{{ a['alias'] }}</strong>{% else %}-{%endif%}</td>
+       <td>{{ a['adminId'] }}</td>
        <td>{{ a['heightAdded'] }}</td>
        <td>{{ a['pubKey'] }}</td>
     </tr>
