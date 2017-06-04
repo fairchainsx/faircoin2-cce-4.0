@@ -16,7 +16,7 @@
     Block Height: <a href="/block?block={{ transaction.blk[0] }}">{{ transaction.blk[0] }}</a><br>
     TX Hash: {{ transaction.tx[0] }}<br>
     Version: {{ transaction.tx[1] }}<br>
-    Locktime: {{ transaction.tx[3] }} ({{transaction.tx[3] | format_time }})<br>
+    Locktime: {{ transaction.tx[3] }}{% if transaction.tx[3] > 500000000 %} ({{transaction.tx[3] | format_time }}){% endif %}<br>
     Size: {{ transaction.tx[2] }}<br>
     Number of Inputs: {{transaction.txin | length }}<br>
     Number of Outputs: {{ transaction.txout | length}}<br>
