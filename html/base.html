@@ -19,14 +19,14 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="btn" href="/">Home</a>
-                <a class="btn" href="peers">Peers</a>
-                <a class="btn" href="rich">Rich List</a>
-                <a class="btn" href="activecvns">Active CVNs</a>
-                <a class="btn" href="blocks?block_type=missing">Missing signers blocks</a>
-                <a class="btn" href="blocks?block_type=cvninfo">CVNInfo payload blocks</a>
-                <a class="btn" href="blocks?block_type=params">Chain parameters blocks</a>
-                <a class="btn" href="blocks?block_type=admins">Chain admins blocks</a>
-                <a class="btn" href="largetx">Largest TX</a>
+                <a class="btn{% if navItem == 'peers' %} active{%endif%}" href="peers">Peers</a>
+                <a class="btn{% if navItem == 'rich' %} active{%endif%}" href="rich">Rich List</a>
+                <a class="btn{% if navItem == 'activecvns' %} active{%endif%}" href="activecvns">Active CVNs</a>
+                <a class="btn{% if navItem == 'missing' %} active{%endif%}" href="blocks?block_type=missing">Missing signers blocks</a>
+                <a class="btn{% if navItem == 'cvninfo' %} active{%endif%}" href="blocks?block_type=cvninfo">CVNInfo payload blocks</a>
+                <a class="btn{% if navItem == 'params' %} active{%endif%}" href="blocks?block_type=params">Chain parameters blocks</a>
+                <a class="btn{% if navItem == 'admins' %} active{%endif%}" href="blocks?block_type=admins">Chain admins blocks</a>
+                <a class="btn{% if navItem == 'largetx' %} active{%endif%}" href="largetx">Largest TX</a>
             </div>
         </div>
     </nav>

@@ -58,7 +58,8 @@ class explorer:
                 'ratelabel': CONFIG['stat']['ratelabel'],
                 'numberOfBlocks': num,
                 'nextPage': height + num,
-                'prevPage': height - num
+                'prevPage': height - num,
+                'navItem': 'home'
             }
             return template.render(templateVars)
         except Exception as e:
@@ -104,7 +105,8 @@ class explorer:
             template = templateEnv.get_template('peers.html')
             templateVars = {
                     'peerinfo': peerinfo,
-                    'name': CONFIG['chain']['name']
+                    'name': CONFIG['chain']['name'],
+                    'navItem': 'peers'
                         }
             return template.render(templateVars)
         except Exception as e:
@@ -118,7 +120,8 @@ class explorer:
             template = templateEnv.get_template('rich.html')
             templateVars = {
                     'rich': rich,
-                    'name': CONFIG['chain']['name']
+                    'name': CONFIG['chain']['name'],
+                    'navItem': 'rich'
                         }
             return template.render(templateVars)
         except Exception as e:
@@ -132,7 +135,8 @@ class explorer:
             template = templateEnv.get_template('cvns.html')
             templateVars = {
                     'cvns': cvns,
-                    'name': CONFIG['chain']['name']
+                    'name': CONFIG['chain']['name'],
+                    'navItem': 'activecvns'
                         }
             return template.render(templateVars)
         except Exception as e:
@@ -142,12 +146,14 @@ class explorer:
     @cherrypy.expose
     def blocks(self, **args):
         try:
-            blocks, payload = get_blocks(args.get('block_type', 0))
+            list_type = args.get('block_type', 0)
+            blocks, payload = get_blocks(list_type)
             template = templateEnv.get_template('blocks.html')
             templateVars = {
                     'blocks': blocks,
                     'name': CONFIG['chain']['name'],
-                    'payload': payload
+                    'payload': payload,
+                    'navItem': list_type
                         }
             return template.render(templateVars)
         except Exception as e:
@@ -190,7 +196,8 @@ class explorer:
             template = templateEnv.get_template('largetx.html')
             templateVars = {
                     'largetx': largetx,
-                    'name': CONFIG['chain']['name']
+                    'name': CONFIG['chain']['name'],
+                    'navItem': 'largetx'
                         }
             return template.render(templateVars)
         except Exception as e:
