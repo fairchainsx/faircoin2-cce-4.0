@@ -337,7 +337,20 @@ def get_block(block):
             chainParameter['retryNewSigSetInterval'] = params[13]
             chainParameter['description'] = params[14]
 
-        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[12] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins}
+        coinSupply = {}
+        supply = query_single('SELECT * FROM coinSupply WHERE height = %s', blk[0])
+
+        if supply:
+            coinSupply['version'] = supply[1]
+            coinSupply['value'] = supply[2]
+            coinSupply['isFinal'] = supply[3]
+            coinSupply['description'] = supply[4]
+            coinSupply['destinationHex'] = supply[5]
+            coinSupply['destinationAsm'] = supply[6]
+            coinSupply['destinationType'] = supply[7]
+            coinSupply['destinationAddress'] = supply[8]
+
+        return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[12] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins, 'coinSupply': coinSupply}
     except Exception as e:
         print >> sys.stderr, e, 'Block Page'
         return {'Status': 'error', 'Data': 'Block not found'}

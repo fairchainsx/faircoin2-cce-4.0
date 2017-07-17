@@ -195,6 +195,16 @@ def process_block(blk_height):
             cp['height'] = blk_height
             add_row('chainParameter', cp)
 
+        if block['coinSupply']:
+            cs = block['coinSupply']
+            dst = cs['destination']
+            cs['height'] = blk_height
+            cs['destinationAsm'] = dst['asm']
+            cs['destinationHex'] = dst['hex']
+            cs['destinationType'] = dst['type']
+            cs['destinationAddress'] = ", ".join(dst['addresses'])
+            add_row('coinSupply', cs)
+
         conn.commit()
         ret = query_noreturn('UPDATE block SET total_sent = %s, total_fee = %s, n_tx = %s WHERE height = %s',
                              total_sent, total_fee, len(block['tx']), blk_height)

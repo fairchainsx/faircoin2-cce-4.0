@@ -120,6 +120,27 @@ CREATE TABLE `chainParameter` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `coinSupply`
+--
+
+DROP TABLE IF EXISTS `coinSupply`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `coinSupply` (
+  `height` mediumint(9) NOT NULL DEFAULT '-1',
+  `version` int(11) NOT NULL DEFAULT '0',
+  `value` decimal(17,8) NOT NULL DEFAULT '0',
+  `isFinal` int(1) NOT NULL DEFAULT '0',
+  `description` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `destinationAsm` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `destinationHex` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `destinationType` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `destinationAddress` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`height`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `cvn`
 --
 

@@ -144,6 +144,30 @@
     </table>
 </div>
 {% endif %}
+
+{% if block['coinSupply'] %}
+<div class="container-fluid">
+<br /> <h2>Coin supply payload</h2><br />
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered">
+        <thead>
+            <th>Name</th>
+            <th>Value</th>
+        </thead>
+     <tbody>
+
+    <tr><td>Version</td><td>{{ block['coinSupply']['version'] }}</td></tr>
+    <tr><td>Amount</td><td>{{ block['coinSupply']['value']  | normalize }} FAIR</td></tr>
+    <tr><td>Is this the final coin supply</td><td>{{ block['coinSupply']['isFinal'] }}</td></tr>
+    <tr><td>Description</td><td>{{ block['coinSupply']['description'] }}</td></tr>
+    <tr><td>Destination address</td><td>{{ block['coinSupply']['destinationAddress'] }}</td></tr>
+    <tr><td>Destination script</td><td>{{ block['coinSupply']['destinationAsm'] }}</td></tr>
+    <tr><td>Destination script hex</td><td>{{ block['coinSupply']['destinationHex'] }}</td></tr>
+    <tr><td>Destination script type</td><td>{{ block['coinSupply']['destinationType'] }}</td></tr>
+    </tbody>
+    </table>
+</div>
+{% endif %}
+
 {% else %}
 <br /><h1 style="text-align:center;">Block was not found.</h1></div>
 
