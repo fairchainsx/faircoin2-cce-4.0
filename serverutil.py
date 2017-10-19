@@ -413,6 +413,25 @@ def get_active_cvns():
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
+def get_cvn_stats():
+    try:
+        stats = query_multi(
+                    'select a.alias, a.nodeId, count(distinct m.height) missed '
+                    'from cvnalias a '
+                    'left join missingCreatorIds m on a.nodeId = m.nodeId '
+                    'left join cvn c on a.nodeId = c.nodeId '
+                    'where a.isActive = 1 and a.isAdmin = 0 '
+                    'group by a.nodeId,c.heightAdded order by missed, c.heightAdded')
+        if stats is None:
+            return {'Status': 'error', 'Data': 'Not Found'}
+        else:
+            return {'Status': 'OK', 'Data': stats}
+
+    except Exception as e:
+        print >> sys.stderr, e, 'Active CVNs List'
+        return {'Status': 'error', 'Data': 'Unknown error'}
+
+
 def get_largetx():
     try:
         largetx = query_multi('SELECT * FROM large_tx ORDER BY amount DESC')

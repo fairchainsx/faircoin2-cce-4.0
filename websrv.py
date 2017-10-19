@@ -144,6 +144,21 @@ class explorer:
             raise cherrypy.HTTPError(503)
 
     @cherrypy.expose
+    def cvnstats(self, **args):
+        try:
+            stats = get_cvn_stats()
+            template = templateEnv.get_template('cvnstats.html')
+            templateVars = {
+                    'stats': stats,
+                    'name': CONFIG['chain']['name'],
+                    'navItem': 'cvnstats'
+                        }
+            return template.render(templateVars)
+        except Exception as e:
+            print >> sys.stderr, e , 'Cvn stats page'
+            raise cherrypy.HTTPError(503)
+
+    @cherrypy.expose
     def blocks(self, **args):
         try:
             list_type = args.get('block_type', 0)

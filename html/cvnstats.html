@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<br />
+<div class="jumbotron">
+    <h2>The number of blocks a CVN missed</h2>
+    </div>
+    <div class="container-fluid table-responsive">
+     <table class="table table-condensed table-striped table-hover table-responsive table-bordered cvninfo">
+        <thead>
+            <th>Rank</th>
+            <th>Alias</th>
+            <th>CVN ID</th>
+            <th>Missed blocks</th>
+        </thead>
+     <tbody>
+
+    {% for row in stats.Data %}
+    <tr>
+       <td>{{ loop.index }}</td>
+       <td>{% if row[0] %}<strong>{{ row[0] }}</strong>{% else %}-{%endif%}</td>
+       <td>{{ row[1] }}</td>
+       <td>{{ row[2] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
+{% endblock %}
+git diff

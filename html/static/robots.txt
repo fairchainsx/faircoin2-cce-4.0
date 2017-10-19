@@ -1,12 +1,14 @@
 User-agent: *
-Disallow: /api/
-Disallow: /block/
-Disallow: /transaction/
-Disallow: /address/
-Disallow: /largetx/
-Disallow: /peerinfo/
-Disallow: /image/
-Disallow: /css/
-Disallow  /js/
-Disallow: /fonts/
+Disallow: /blocks
+Disallow: /blocks?*
+Disallow: /block
+Disallow: /block?*
+Disallow: /transaction
+Disallow: /transaction?*
+Disallow: /peers
 
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: wotbox
+Disallow: /

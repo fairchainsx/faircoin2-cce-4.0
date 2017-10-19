@@ -8,7 +8,7 @@
     <input type="text"  size = "75" name="sterm" pattern="[a-zA-Z0-9 ]{1,}"title="a-z A-Z 0-9" maxlength="75"  autofocus required>
     <button type ="submit" class="button" value="Display">&larr;Search Height, Hash or Address</button></form><br>
     {% if rich.Status != "error" %}
-    <h2> Top Address Balances </h2>
+    <h2>Top {{rich.Data | length }} Address Balances</h2>
     </div>
     <div class="container-fluid table-responsive">
          <table class="table table-condensed table-striped table-hover">

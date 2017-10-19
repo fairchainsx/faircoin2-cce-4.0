@@ -152,7 +152,8 @@ CREATE TABLE `cvn` (
   `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
   `heightAdded` mediumint(9) NOT NULL DEFAULT '-1',
   `pubKey` varchar(148) COLLATE utf8_bin NOT NULL DEFAULT '',
-  PRIMARY KEY (`height`,`nodeId`)
+  PRIMARY KEY (`height`,`nodeId`),
+  KEY `nodeId` (`nodeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -166,6 +167,8 @@ DROP TABLE IF EXISTS `cvnalias`;
 CREATE TABLE `cvnalias` (
   `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
   `alias` varchar(32) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `isAdmin` smallint(6) NOT NULL DEFAULT '0',
+  `isActive` smallint(6) NOT NULL DEFAULT '0',
   PRIMARY KEY (`nodeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -210,7 +213,8 @@ DROP TABLE IF EXISTS `missingCreatorIds`;
 CREATE TABLE `missingCreatorIds` (
   `height` mediumint(9) NOT NULL DEFAULT '-1',
   `nodeId` varchar(10) COLLATE utf8_bin NOT NULL DEFAULT 'undef',
-  PRIMARY KEY (`height`,`nodeId`)
+  PRIMARY KEY (`height`,`nodeId`),
+  KEY `nodeId` (`nodeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
