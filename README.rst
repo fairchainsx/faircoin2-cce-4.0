@@ -20,7 +20,7 @@ will be added to this open source package.
 
 Requirements for Database Loader
 --------------------------------
-* Python 2.7
+* Python 3.x
 * MySQL-Server
 * Simplejson
 * PyMySql
@@ -36,7 +36,7 @@ Requirements for Web Server
 
 Where to Get Dependencies
 -------------------------
-* Python 2.7: (sudo) apt-get install python-dev
+* Python 3.x: (sudo) apt-get install python3-dev
 
 * MySQL Server: (sudo) apt-get install mysql-server
 
@@ -62,6 +62,3 @@ Documentation Files
         - dbload.rst (Setup, configuration and operation of the database loader)
 
         - web_server.rst (Setup, configuration and operation of the web server)
-
-
-
