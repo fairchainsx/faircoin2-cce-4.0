@@ -25,14 +25,14 @@
 
 import os
 import time
-import ConfigParser
+import configparser
 import simplejson as json
 import logging
 import requests
 from interruptingcow import timeout
 
 # Configuration file reader
-config_parse = ConfigParser.ConfigParser()
+config_parse = configparser.ConfigParser(inline_comment_prefixes = ";")
 config_parse.read('cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
@@ -53,7 +53,7 @@ def comm_error_log(msg, function_name='No function name provided'):
     logging.basicConfig(filename=str(os.getcwd() + '/comm.log'), level=logging.WARN)
     logging.error(currtime + ' ' + str(msg) + ' : ' + str(function_name))
 
-# Daemon RPC 
+# Daemon RPC
 def jsonrpc(method, *params):
     try:
         headers = {'content-type': 'application/json'}

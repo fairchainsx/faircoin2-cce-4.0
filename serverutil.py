@@ -23,7 +23,7 @@
 
 import sys
 import time
-import ConfigParser
+import configparser
 import re
 import pymysql
 from DBUtils.PooledDB import PooledDB
@@ -32,7 +32,7 @@ from collections import OrderedDict
 
 
 # Configuration file reader
-config_parse = ConfigParser.ConfigParser()
+config_parse = configparser.ConfigParser(inline_comment_prefixes = ";")
 config_parse.read('cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
@@ -106,7 +106,7 @@ def query_single(sql, *parms):
         db.close()
         return ret
     except Exception as e:
-        print >> sys.stderr, e, str('query_single: ' + sql)
+        sys.stderr.write(e+str('query_single: ' + sql))
         cur.close()
         db.close()
         return None
@@ -122,7 +122,7 @@ def query_multi(sql, *parms):
         db.close()
         return ret
     except Exception as e:
-        print >> sys.stderr, e, str('query_multi: ' + sql)
+        sys.stderr.write(e+str('query_multi: ' + sql))
         cur.close()
         db.close()
         return None
@@ -137,7 +137,7 @@ def query_noreturn(sql, *parms):
         db.close()
         return ret
     except Exception as e:
-        print >> sys.stderr, e, str('query_noreturn: ' + sql)
+        sys.stderr.write(e+str('query_noreturn: ' + sql))
         cur.close()
         db.close()
         return None
@@ -153,9 +153,9 @@ def homepage(num, height):
                 num = 100
 
         stats = query_single('SELECT * FROM stats')
-        base_query = """select b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing from block b 
-            LEFT JOIN cvnalias a on a.nodeId = b.creator 
-            LEFT JOIN missingCreatorIds m on m.height = b.height 
+        base_query = """select b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing from block b
+            LEFT JOIN cvnalias a on a.nodeId = b.creator
+            LEFT JOIN missingCreatorIds m on m.height = b.height
             LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId """
         if height is None:
             topblocks = query_multi(base_query + 'GROUP BY b.height ORDER BY height DESC LIMIT %s', num)
@@ -165,7 +165,7 @@ def homepage(num, height):
 
         return num, int(height), {'Status': 'ok', 'stats': stats, 'topblocks': topblocks}
     except Exception as e:
-        print >> sys.stderr, e, 'Homepage'
+        sys.stderr.write(e+'Homepage')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 def get_blocks(block_type):
@@ -185,21 +185,21 @@ def get_blocks(block_type):
         #      left join cvnalias a on a.nodeId = m.nodeId where m.nodeId is not NULL group by b.height;
         if block_type == 'missing':
             payload = "Last 50 blocks with missing signers"
-            blocks = query_multi("""SELECT b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing FROM block b 
-                LEFT JOIN cvnalias a on a.nodeId = b.creator 
-                LEFT JOIN missingCreatorIds m on m.height = b.height 
-                LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId 
+            blocks = query_multi("""SELECT b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing FROM block b
+                LEFT JOIN cvnalias a on a.nodeId = b.creator
+                LEFT JOIN missingCreatorIds m on m.height = b.height
+                LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId
                 WHERE m.nodeId is not NULL GROUP BY b.height ORDER BY height DESC LIMIT 50""")
         else:
-            blocks = query_multi(("""SELECT b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing FROM block b 
-                LEFT JOIN cvnalias a on a.nodeId = b.creator 
-                LEFT JOIN missingCreatorIds m on m.height = b.height 
-                LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId 
+            blocks = query_multi(("""SELECT b.*,a.alias,GROUP_CONCAT(ma.alias,' (',m.nodeId,')') missing FROM block b
+                LEFT JOIN cvnalias a on a.nodeId = b.creator
+                LEFT JOIN missingCreatorIds m on m.height = b.height
+                LEFT JOIN cvnalias ma on ma.nodeId = m.nodeId
                 WHERE b.payload LIKE %s GROUP BY b.height ORDER BY height DESC"""), ('%' + payload + '%'))
 
         return {'Status': 'ok', 'blocks': blocks}, payload
     except Exception as e:
-        print >> sys.stderr, e, 'get_blocks'
+        sys.stderr.write(e+ 'get_blocks')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -352,7 +352,7 @@ def get_block(block):
 
         return {'Status': 'ok', 'blk': blk, 'transactions': transactions, 'cvns': cvns, 'chainParameter': chainParameter, 'realVersion': (blk[12] & 0xff), 'creatorAlias': creatorAlias, 'chainAdmins': chainAdmins, 'coinSupply': coinSupply}
     except Exception as e:
-        print >> sys.stderr, e, 'Block Page'
+        sys.stderr.write(e+ 'Block Page')
         return {'Status': 'error', 'Data': 'Block not found'}
 
 
@@ -367,7 +367,7 @@ def get_transaction(transaction):
         blk = query_single('SELECT b.*, 0 as size FROM block b WHERE b.height = %s', txout[0][6])
         return {'Status': 'ok', 'blk': blk, 'txin': txin, 'txout': txout, 'tx': tx}
     except Exception as e:
-        print >> sys.stderr, e, 'Transactions'
+        sys.stderr.write(e+ 'Transactions')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -380,7 +380,7 @@ def get_peerinfo():
             return {'Status': 'ok', 'Data': peerinfo}
 
     except Exception as e:
-        print >> sys.stderr, e, 'Peerinfo'
+        sys.stderr.write(e+ 'Peerinfo')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -393,7 +393,7 @@ def get_rich():
             return {'Status': 'OK', 'Data': rich}
 
     except Exception as e:
-        print >> sys.stderr, e, 'Rich List'
+        sys.stderr.write(e+ 'Rich List')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -409,7 +409,7 @@ def get_active_cvns():
             return {'Status': 'OK', 'Data': cvns}
 
     except Exception as e:
-        print >> sys.stderr, e, 'Active CVNs List'
+        sys.stderr.write(e+ 'Active CVNs List')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -428,7 +428,7 @@ def get_cvn_stats():
             return {'Status': 'OK', 'Data': stats}
 
     except Exception as e:
-        print >> sys.stderr, e, 'Active CVNs List'
+        sys.stderr.write(e+ 'Active CVNs List')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -441,7 +441,7 @@ def get_largetx():
             return {'Status': 'OK', 'Data': largetx}
 
     except Exception as e:
-        print >> sys.stderr, e, 'Large TX'
+        sys.stderr.write(e+ 'Large TX')
         return {'Status': 'error', 'Data': 'Unknown error'}
 
 
@@ -465,5 +465,5 @@ def get_address(address):
         return {'Status': 'OK', 'balance': balance, 'txin': txin, 'txout': txout, 'address': address}
 
     except Exception as e:
-        print >> sys.stderr, e, 'Address Page'
+        sys.stderr.write(e+ 'Address Page')
         return {'Status': 'error', 'Data': 'Unknown error'}

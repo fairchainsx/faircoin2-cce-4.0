@@ -64,7 +64,7 @@ def loader_error_log(msg, function_name='No function name provided'):
 def accounting(address, amount, credit, count_tx):
     ret = query_single('SELECT balance FROM address WHERE address = %s', address)
     if ret is None:
-        ret = query_noreturn('INSERT INTO address (address,balance) VALUES(%s,%s)', address, "{:.8f}".format(amount))
+        ret = query_noreturn('INSERT IGNORE INTO address (address,balance) VALUES(%s,%s)', address, "{:.8f}".format(amount))
         conn.commit()
     else:
         if credit:
@@ -89,7 +89,7 @@ def add_row(table, row_data):
     keys = allowed_keys.intersection(row_data)
     columns = ", ".join(keys)
     data_template = ", ".join(["%s"] * len(keys))
-    sql = "insert into %s (%s) values (%s)" % (table, columns, data_template)
+    sql = "insert ignore into %s (%s) values (%s)" % (table, columns, data_template)
     data_tuple = tuple(row_data[key] for key in keys)
     cur.execute(sql, data_tuple)
     cur.close()
@@ -297,7 +297,7 @@ def main(argv):
             # Recheck mode, re-parse the last 5 blocks in the database
             if startmode == 'recheck' and blk_height > 5:
                 if verbose:
-                    print >> sys.stderr, "Recheck Called"
+                    sys.stderr.write("Recheck Called")
                 for blk in range(blk_height - 5, blk_height):
                     orphan(blk, True)
 
@@ -330,33 +330,32 @@ def main(argv):
                     ret = query_noreturn('INSERT INTO large_tx SELECT tx_hash,SUM(value) FROM tx_out GROUP BY tx_hash ORDER BY SUM(value) DESC LIMIT 100')
                 blk_height += 1
                 if verbose:
-                    print >> sys.stderr, 'Processing Block: ', blk_height, ' of ', top_height, '\r',
-
+                    sys.stderr.write('Processing Block: '+str(blk_height)+' of '+str(top_height)+'\r',)
 
             # Call Statistics module
             if CONFIG['loader']['stats'] == 'true':
                 if verbose:
-                    print >> sys.stderr, '\nCalling Statistics Module'
+                    sys.stderr.write('\nCalling Statistics Module')
                 stats.main()
 
 
     except Exception as e:
-        print "Exception in user code:"
-        print '-'*60
+        print("Exception in user code:")
+        print('-'*60)
         traceback.print_exc(file=sys.stdout)
-        print '-'*60
+        print('-'*60)
 
         loader_error_log(str(e), 'Main loop')
         conn.close()
         os.remove(os.path.expanduser(lockdir))
         if verbose:
-            print >> sys.stderr, '\nMain Loop', str(e)
+            sys.stderr.write('\nMain Loop'+str(e))
         sys.exit(0)
 
     # Clean up
     conn.close()
     if verbose:
-        print >> sys.stderr, "Database load complete"
+        sys.stderr.write("Database load complete\n")
     os.remove(os.path.expanduser(recheckdir))
     os.remove(os.path.expanduser(lockdir))
 

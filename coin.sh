@@ -1,7 +1,9 @@
 #! /bin/bash
 
-cd <Complete path to dbloader directory>
+# path to repository
+cd ~/faircoin2-cce-4.0
 
-python dbload.py
+# start database loader
+python3 dbload.py
 
 exit 0

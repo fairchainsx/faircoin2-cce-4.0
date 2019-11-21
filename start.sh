@@ -5,5 +5,6 @@
 
 sleep 20
 
-rm <path to dbloader directory>/dataload.lock 2> /dev/null
-<path to coin daemon executable>  --daemon 2> /dev/null &
+# start faircoin daemon
+rm ~/faircoin2-cce-4.0/dataload.lock 2> /dev/null
+~/faircoin/faircoind --daemon 2> /dev/null &
