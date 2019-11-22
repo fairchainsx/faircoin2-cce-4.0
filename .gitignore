@@ -1,6 +1,3 @@
 *.pyc
 *.pid
-html/static/css
-html/static/fonts
-html/static/js
 *.log

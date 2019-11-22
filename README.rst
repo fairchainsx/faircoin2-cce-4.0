@@ -34,30 +34,17 @@ Requirements for Web Server
 * Jinja2
 * DBUtils 1.1
 
-Where to Get Dependencies
+Installation
 -------------------------
-* Python 3.x: (sudo) apt-get install python3-dev
+* follow the instructions [/docs/installation.md](/docs/installation.md)
 
-* MySQL Server: (sudo) apt-get install mysql-server
-
-* Simplejson: (sudo) apt-get install python-simplejson
-
-* Jinja2: (sudo) apt-get install python-jinja2
-
-* Requests: (sudo) apt-get install python-requests
-
-        - Alternate: https://pypi.python.org/pypi/requests/
-* PyMySql: https://github.com/PyMySQL/PyMySQL
-
-* Interrupting cow: https://pypi.python.org/pypi/interruptingcow
-
-* DBUtils 1.1: https://pypi.python.org/pypi/DBUtils
-
-* CherryPy: http://www.cherrypy.org/
+Usage
+-------------------------
+* follow the instructions [/docs/usage.md](/docs/usage.md)
 
 Documentation Files
 -------------------
-* Located in the the docs folder
+* some more detailed informations are located in the the docs folder
 
         - dbload.rst (Setup, configuration and operation of the database loader)
 

@@ -1,5 +1,3 @@
-#! /bin/bash
+#!/bin/sh
 
 kill $(cat cherrypy.pid)
-
-#rm err.log

@@ -33,7 +33,7 @@ from collections import OrderedDict
 
 # Configuration file reader
 config_parse = configparser.ConfigParser(inline_comment_prefixes = ";")
-config_parse.read('cce.conf')
+config_parse.read('../cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
 URL = str('http://' + CONFIG["coind"]["rpcuser"] + ':' + CONFIG["coind"]["rpcpass"] + '@' + CONFIG["coind"]["rpchost"] + ':' + CONFIG["coind"][

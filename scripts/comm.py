@@ -33,7 +33,7 @@ from interruptingcow import timeout
 
 # Configuration file reader
 config_parse = configparser.ConfigParser(inline_comment_prefixes = ";")
-config_parse.read('cce.conf')
+config_parse.read('../cce.conf')
 CONFIG = {section: {option: config_parse.get(section, option) for option in config_parse.options(section)} for section
           in config_parse.sections()}
 from warnings import filterwarnings
